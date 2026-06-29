@@ -843,150 +843,78 @@ svg:not(.action-btn svg):not(.upload-zone svg){max-width:22px;}
 // ════════════════════════════════════════
 // CLOUD DB — JSONBin.io sync
 // ════════════════════════════════════════
-const JBKEY = '$2a$10$pi1ogq15Lg4kioV6X1K9n.CWJUm112o/XkGtsyL6CKdl3FqZoQ5vu';
-const JB_BASE = 'https://api.jsonbin.io/v3/b';
+// ════════════════════════════════════════
+// FIREBASE — Sincronizare reală pe toate dispozitivele
+// ════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBDCoGUcQB2KFHqNrSdHP3GEj0-0kxMUS0",
+  authDomain: "planificare-servicii-db3ad.firebaseapp.com",
+  projectId: "planificare-servicii-db3ad",
+  storageBucket: "planificare-servicii-db3ad.firebasestorage.app",
+  messagingSenderId: "478288856747",
+  appId: "1:478288856747:web:22aa4370da06ad1019d9ee"
+};
 
-// Local cache so UI stays fast
+// Cache local pentru viteză
 const _cache = {};
+let _db = null; // Firestore instance
 
-// Bin IDs stored in localStorage after first creation
-const BIN_IDS_KEY = 'ps_bin_ids';
-// MASTER_BIN_ID: After first setup, this ID will be in localStorage
-// ALL devices share the same bins via JSONBin account
-const MASTER_BIN_NAME = 'ps-master-index';
-
-function getBinIds() {
-  try { return JSON.parse(localStorage.getItem(BIN_IDS_KEY)) || {}; } catch { return {}; }
-}
-function saveBinIds(ids) {
-  localStorage.setItem(BIN_IDS_KEY, JSON.stringify(ids));
-}
-
-// Collections we manage
-const COLLECTIONS = ['users','config','planificari','anunturi','rapoarte','rapoarte_arhiva','modele'];
-
-// Default data for first run
-function getDefault(k) {
-  if(k==='users') return {data:[{id:'admin1',name:'Administrator',email:'admin@companie.ro',pass:'admin123',role:'admin',isPrincipal:true,status:'active',createdAt:'01.01.2026'}]};
-  if(k==='config') return {cod:genCod(),ap_activ:false,ap_start:true,weekend_mode:'standard',unitate:'COMPANIA 1',last_antet:{}};
-  return {data:[]};
-}
-
-// Show loading overlay
-function showLoading(msg) {
-  let ov = document.getElementById('cloud-loading');
-  if(!ov) {
-    ov = document.createElement('div');
-    ov.id = 'cloud-loading';
-    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono)';
-    ov.innerHTML = '<div style="color:var(--orange);font-size:22px;margin-bottom:16px">⟳</div><div id="cloud-msg" style="color:var(--text2);font-size:13px"></div>';
-    document.body.appendChild(ov);
-  }
-  document.getElementById('cloud-msg').textContent = msg || 'Se conectează...';
-  ov.style.display = 'flex';
-}
-function hideLoading() {
-  const ov = document.getElementById('cloud-loading');
-  if(ov) ov.style.display = 'none';
-}
-
-// Create a bin
-async function findOrCreateBin(name, defaultData) {
-  // Search for existing bin by name
-  const searchResp = await fetch(`${JB_BASE}s/c`, {
-    headers: {'X-Master-Key': JBKEY}
-  });
-  if(searchResp.ok) {
-    const collections = await searchResp.json();
-    // JSONBin collections endpoint - search through bins
-  }
-
-  // Try to get list of all bins
-  const listResp = await fetch(`${JB_BASE}s`, {
-    headers: {'X-Master-Key': JBKEY}
-  });
-  if(listResp.ok) {
-    const bins = await listResp.json();
-    if(Array.isArray(bins)) {
-      const found = bins.find(b => b.snippetMeta?.name === name || b.record?.meta?.name === name);
-      if(found) return found.id || found._id;
-    }
-  }
-  return null;
-}
-
-async function createBin(name, data) {
-  const safeName = (name || 'bin').replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 128);
-  const r = await fetch(JB_BASE, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JBKEY,
-      'X-Bin-Name': safeName
-    },
-    body: JSON.stringify(data)
-  });
-  if(!r.ok) {
-    const t = await r.text();
-    console.error('createBin error:', r.status, t, 'name:', safeName);
-    throw new Error('createBin failed: ' + r.status + ' ' + t);
-  }
-  const j = await r.json();
-  console.log('Created bin:', safeName, '->', j.metadata?.id);
-  return j.metadata?.id;
-}
-
-async function readBin(id) {
-  const r = await fetch(`${JB_BASE}/${id}/latest`, {
-    headers: {'X-Master-Key': JBKEY}
-  });
-  if(!r.ok) {
-    const t = await r.text();
-    console.error('readBin error:', r.status, t);
-    throw new Error('readBin ' + r.status);
-  }
-  const j = await r.json();
-  return j.record;
-}
-
-async function writeBin(id, data) {
-  await fetch(`${JB_BASE}/${id}`, {
-    method: 'PUT',
-    headers: {'Content-Type': 'application/json', 'X-Master-Key': JBKEY},
-    body: JSON.stringify(data)
+// Inițializare Firebase
+function initFirebase() {
+  return new Promise((resolve, reject) => {
+    // Load Firebase scripts dynamically
+    const scripts = [
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js'
+    ];
+    
+    let loaded = 0;
+    scripts.forEach(src => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.onload = () => {
+        loaded++;
+        if(loaded === scripts.length) {
+          try {
+            const app = firebase.initializeApp(FIREBASE_CONFIG);
+            _db = firebase.firestore();
+            resolve(_db);
+          } catch(e) {
+            reject(e);
+          }
+        }
+      };
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
   });
 }
 
-// DB interface — reads from cache, writes to cloud
+// ── DB Interface ──────────────────────────────
 const DB = {
   get(k) {
-    const configKeys = ['cod','ap_activ','ap_start','weekend_mode','unitate','last_antet'];
-    if(configKeys.includes(k)) {
+    const cfgKeys = ['cod','ap_activ','ap_start','weekend_mode','unitate','last_antet'];
+    if(cfgKeys.includes(k)) {
       const cfg = _cache['config'] || {};
       return cfg[k] !== undefined ? cfg[k] : null;
     }
-    if(k === 'session') { try{ return JSON.parse(localStorage.getItem('ps_session')); }catch{return null;} }
-    if(k.startsWith('elev_prefs_')) { try{ return JSON.parse(localStorage.getItem('ps_'+k)); }catch{return null;} }
-    const val = _cache[k];
-    if(val === undefined || val === null) return null;
-    // JSONBin wraps arrays in {data:[]} — unwrap here
-    if(val && typeof val === 'object' && !Array.isArray(val) && Array.isArray(val.data)) return val.data;
-    return val;
+    if(k === 'session') { try{ return JSON.parse(localStorage.getItem('ps_session')); }catch{ return null; } }
+    if(k.startsWith('elev_prefs_')) { try{ return JSON.parse(localStorage.getItem('ps_'+k)); }catch{ return null; } }
+    return _cache[k] !== undefined ? _cache[k] : null;
   },
 
   set(k, v) {
-    const configKeys = ['cod','ap_activ','ap_start','weekend_mode','unitate','last_antet'];
-    if(configKeys.includes(k)) {
-      if(!_cache['config']) _cache['config'] = getDefault('config');
+    const cfgKeys = ['cod','ap_activ','ap_start','weekend_mode','unitate','last_antet'];
+    if(cfgKeys.includes(k)) {
+      if(!_cache['config']) _cache['config'] = getConfigDefault();
       _cache['config'][k] = v;
-      DB._scheduleWrite('config');
+      DB._save('config', _cache['config']);
       return true;
     }
     if(k === 'session') { localStorage.setItem('ps_session', JSON.stringify(v)); return true; }
     if(k.startsWith('elev_prefs_')) { localStorage.setItem('ps_'+k, JSON.stringify(v)); return true; }
-    // JSONBin needs objects not arrays — wrap arrays
-    _cache[k] = Array.isArray(v) ? {data: v} : v;
-    DB._scheduleWrite(k);
+    _cache[k] = v;
+    DB._save(k, v);
     return true;
   },
 
@@ -995,147 +923,102 @@ const DB = {
     delete _cache[k];
   },
 
-  _writeTimers: {},
-  _scheduleWrite(k) {
-    clearTimeout(DB._writeTimers[k]);
-    DB._writeTimers[k] = setTimeout(() => DB._flush(k), 800);
-  },
-
-  async _flush(k) {
-    const ids = getBinIds();
-    if(!ids[k]) return;
-    // _cache already stores in JSONBin-compatible format
-    const data = _cache[k] || (k === 'config' ? {} : {data: []});
-    try { await writeBin(ids[k], data); } catch(e) { console.warn('Sync error:', k, e); }
+  _timers: {},
+  _save(k, v) {
+    clearTimeout(DB._timers[k]);
+    DB._timers[k] = setTimeout(async () => {
+      if(!_db) return;
+      try {
+        const docRef = _db.collection('planificare').doc(k);
+        await docRef.set({ data: v, updatedAt: Date.now() });
+      } catch(e) {
+        console.warn('Firebase save error:', k, e.message);
+      }
+    }, 800);
   }
 };
 
-// Initialize — load all bins from cloud
+function getConfigDefault() {
+  return { cod: genCod(), ap_activ: false, ap_start: true, weekend_mode: 'standard', unitate: 'COMPANIA 1', last_antet: {} };
+}
+
+function getDefault(k) {
+  if(k === 'users') return [{id:'admin1',name:'Administrator',email:'admin@companie.ro',pass:'admin123',role:'admin',isPrincipal:true,status:'active',createdAt:'01.01.2026'}];
+  if(k === 'config') return getConfigDefault();
+  return [];
+}
+
+// ── Init DB ───────────────────────────────────
 async function initDB() {
-  showLoading('Se conectează la baza de date cloud...');
+  showLoading('Se conectează la Firebase...');
   try {
-    // KEY INSIGHT: Store master bin ID in BOTH localStorage AND fetch it from JSONBin
-    // This way ANY device can find the bins
-
-    // Reset if key changed
-    const storedKeyHash = localStorage.getItem('ps_key_hash');
-    const currentKeyHash = JBKEY.slice(-12);
-    if(storedKeyHash && storedKeyHash !== currentKeyHash) {
-      localStorage.removeItem(BIN_IDS_KEY);
-      localStorage.removeItem('ps_master_id');
-    }
-    localStorage.setItem('ps_key_hash', currentKeyHash);
-
-    let ids = getBinIds();
-
-    // If no IDs locally, try to fetch master index from JSONBin by searching
-    if(Object.keys(ids).length === 0) {
-      showLoading('Se caută datele existente...');
+    await initFirebase();
+    showLoading('Se încarcă datele...');
+    
+    const COLLECTIONS = ['users','config','planificari','anunturi','rapoarte','rapoarte_arhiva','modele'];
+    
+    await Promise.all(COLLECTIONS.map(async col => {
       try {
-        // Try to get list of bins from JSONBin account
-        const listResp = await fetch('https://api.jsonbin.io/v3/b?sortBy=createdAt&order=desc&limit=20', {
-          headers: {'X-Master-Key': JBKEY}
-        });
-        if(listResp.ok) {
-          const bins = await listResp.json();
-          if(Array.isArray(bins)) {
-            // Find our bins by name
-            for(const bin of bins) {
-              const name = bin.record?.meta?.name || bin.snippetMeta?.name || '';
-              const binId = bin.id || bin._id || bin.snippetMeta?.id;
-              if(name && binId) {
-                const col = name.replace('ps-', '');
-                if(COLLECTIONS.includes(col)) {
-                  ids[col] = binId;
-                }
-              }
-            }
-            if(Object.keys(ids).length > 0) {
-              saveBinIds(ids);
-              console.log('Found existing bins:', Object.keys(ids));
-            }
-          }
+        const doc = await _db.collection('planificare').doc(col).get();
+        if(doc.exists && doc.data()?.data !== undefined) {
+          _cache[col] = doc.data().data;
+        } else {
+          // First time — create with defaults
+          const def = getDefault(col);
+          _cache[col] = def;
+          await _db.collection('planificare').doc(col).set({ data: def, updatedAt: Date.now() });
+          console.log('Created:', col);
         }
       } catch(e) {
-        console.warn('Could not search bins:', e);
+        console.warn('Load error:', col, e.message);
+        _cache[col] = getDefault(col);
       }
-    }
-
-    const needsInit = COLLECTIONS.some(c => !ids[c]);
-
-    if(needsInit) {
-      showLoading('Prima configurare (30-60 sec)...');
-      for(const col of COLLECTIONS) {
-        if(!ids[col]) {
-          showLoading('Creare: ' + col + '...');
-          try {
-            const def = getDefault(col);
-            const binId = await createBin('ps-' + col, def);
-            if(binId) {
-              ids[col] = binId;
-              _cache[col] = def;
-            }
-            saveBinIds(ids);
-            await new Promise(r => setTimeout(r, 700));
-          } catch(e) {
-            console.error('Bin create failed:', col, e.message);
-          }
-        }
-      }
-    } else {
-      showLoading('Se încarcă datele...');
-      await Promise.all(COLLECTIONS.map(async col => {
-        try {
-          const data = await readBin(ids[col]);
-          _cache[col] = data;
-        } catch(e) {
-          console.warn('Load err', col);
-          _cache[col] = getDefault(col);
-        }
-      }));
-    }
+    }));
 
     if(!_cache['config'] || typeof _cache['config'] !== 'object') {
-      _cache['config'] = getDefault('config');
+      _cache['config'] = getConfigDefault();
     }
     if(!_cache['config'].cod) _cache['config'].cod = genCod();
+    
     hideLoading();
-    console.log('✓ Cloud DB ready, bins:', ids);
-
+    console.log('✓ Firebase DB ready');
+    
   } catch(e) {
     hideLoading();
-    console.error('DB init error:', e);
+    console.error('Firebase init error:', e);
     showCloudError();
   }
 }
 
 function showCloudError() {
   const div = document.createElement('div');
-  div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:var(--rd);border-bottom:1px solid var(--red);padding:10px 20px;font-family:var(--mono);font-size:12px;color:var(--red);display:flex;align-items:center;justify-content:space-between';
-  div.innerHTML = '⚠ Nu se poate conecta la baza de date cloud. Verificați conexiunea la internet. <button onclick="location.reload()" style="background:var(--red);color:#000;border:none;padding:4px 12px;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:bold">REÎNCARCĂ</button>';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(232,56,40,.15);border-bottom:1px solid #e83828;padding:10px 16px;font-family:monospace;font-size:11px;color:#e83828;display:flex;align-items:center;justify-content:space-between;gap:10px';
+  div.innerHTML = '⚠ Nu se poate conecta la Firebase. Verificați conexiunea la internet. <button onclick="location.reload()" style="background:#e83828;color:#000;border:none;padding:5px 12px;cursor:pointer;font-weight:bold">REÎNCARCĂ</button>';
   document.body.prepend(div);
 }
 
-// Poll for updates every 30s (so all users see fresh data)
 function startSyncPolling() {
+  // Firebase real-time listeners — mai bun decât polling!
+  if(!_db) return;
+  
+  // Listen for changes every 30s
   setInterval(async () => {
-    const ids = getBinIds();
-    // Only refresh data that matters for current view
-    const toRefresh = ['planificari','anunturi','rapoarte','users'];
-    await Promise.all(toRefresh.map(async col => {
-      if(!ids[col]) return;
-      try {
-        const data = await readBin(ids[col]);
-        _cache[col] = data;
-      } catch(e) {}
-    }));
-    // Refresh current page if needed
-    if(currentUser) {
+    if(!currentUser) return;
+    try {
+      const toRefresh = ['planificari','anunturi','rapoarte','users'];
+      await Promise.all(toRefresh.map(async col => {
+        const doc = await _db.collection('planificare').doc(col).get();
+        if(doc.exists && doc.data()?.data !== undefined) {
+          _cache[col] = doc.data().data;
+        }
+      }));
       if(currentUser.role === 'admin' && document.getElementById('page-admin').classList.contains('active')) {
         refreshAdminDash();
       } else if(currentUser.role === 'elev' && document.getElementById('page-elev').classList.contains('active')) {
         refreshElevDash();
       }
+    } catch(e) {
+      console.warn('Sync error:', e.message);
     }
   }, 30000);
 }
