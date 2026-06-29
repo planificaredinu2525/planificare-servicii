@@ -851,6 +851,9 @@ const _cache = {};
 
 // Bin IDs stored in localStorage after first creation
 const BIN_IDS_KEY = 'ps_bin_ids';
+// MASTER_BIN_ID: After first setup, this ID will be in localStorage
+// ALL devices share the same bins via JSONBin account
+const MASTER_BIN_NAME = 'ps-master-index';
 
 function getBinIds() {
   try { return JSON.parse(localStorage.getItem(BIN_IDS_KEY)) || {}; } catch { return {}; }
@@ -888,15 +891,38 @@ function hideLoading() {
 }
 
 // Create a bin
+async function findOrCreateBin(name, defaultData) {
+  // Search for existing bin by name
+  const searchResp = await fetch(`${JB_BASE}s/c`, {
+    headers: {'X-Master-Key': JBKEY}
+  });
+  if(searchResp.ok) {
+    const collections = await searchResp.json();
+    // JSONBin collections endpoint - search through bins
+  }
+
+  // Try to get list of all bins
+  const listResp = await fetch(`${JB_BASE}s`, {
+    headers: {'X-Master-Key': JBKEY}
+  });
+  if(listResp.ok) {
+    const bins = await listResp.json();
+    if(Array.isArray(bins)) {
+      const found = bins.find(b => b.snippetMeta?.name === name || b.record?.meta?.name === name);
+      if(found) return found.id || found._id;
+    }
+  }
+  return null;
+}
+
 async function createBin(name, data) {
-  const safeName = (name || 'bin').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0,128);
+  const safeName = (name || 'bin').replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 128);
   const r = await fetch(JB_BASE, {
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json',
-      'X-Master-Key':JBKEY,
-      'X-Bin-Name':safeName,
-      'X-Private':'false'
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JBKEY,
+      'X-Bin-Name': safeName
     },
     body: JSON.stringify(data)
   });
@@ -910,20 +936,23 @@ async function createBin(name, data) {
   return j.metadata?.id;
 }
 
-// Read a bin
 async function readBin(id) {
   const r = await fetch(`${JB_BASE}/${id}/latest`, {
-    headers:{'X-Master-Key':JBKEY}
+    headers: {'X-Master-Key': JBKEY}
   });
+  if(!r.ok) {
+    const t = await r.text();
+    console.error('readBin error:', r.status, t);
+    throw new Error('readBin ' + r.status);
+  }
   const j = await r.json();
   return j.record;
 }
 
-// Write a bin
 async function writeBin(id, data) {
   await fetch(`${JB_BASE}/${id}`, {
-    method:'PUT',
-    headers:{'Content-Type':'application/json','X-Master-Key':JBKEY},
+    method: 'PUT',
+    headers: {'Content-Type': 'application/json', 'X-Master-Key': JBKEY},
     body: JSON.stringify(data)
   });
 }
@@ -985,16 +1014,53 @@ const DB = {
 async function initDB() {
   showLoading('Se conectează la baza de date cloud...');
   try {
-    // Reset bins dacă cheia s-a schimbat
+    // KEY INSIGHT: Store master bin ID in BOTH localStorage AND fetch it from JSONBin
+    // This way ANY device can find the bins
+
+    // Reset if key changed
     const storedKeyHash = localStorage.getItem('ps_key_hash');
     const currentKeyHash = JBKEY.slice(-12);
     if(storedKeyHash && storedKeyHash !== currentKeyHash) {
-      console.log('Cheie nouă — reset bins');
       localStorage.removeItem(BIN_IDS_KEY);
+      localStorage.removeItem('ps_master_id');
     }
     localStorage.setItem('ps_key_hash', currentKeyHash);
 
     let ids = getBinIds();
+
+    // If no IDs locally, try to fetch master index from JSONBin by searching
+    if(Object.keys(ids).length === 0) {
+      showLoading('Se caută datele existente...');
+      try {
+        // Try to get list of bins from JSONBin account
+        const listResp = await fetch('https://api.jsonbin.io/v3/b?sortBy=createdAt&order=desc&limit=20', {
+          headers: {'X-Master-Key': JBKEY}
+        });
+        if(listResp.ok) {
+          const bins = await listResp.json();
+          if(Array.isArray(bins)) {
+            // Find our bins by name
+            for(const bin of bins) {
+              const name = bin.record?.meta?.name || bin.snippetMeta?.name || '';
+              const binId = bin.id || bin._id || bin.snippetMeta?.id;
+              if(name && binId) {
+                const col = name.replace('ps-', '');
+                if(COLLECTIONS.includes(col)) {
+                  ids[col] = binId;
+                }
+              }
+            }
+            if(Object.keys(ids).length > 0) {
+              saveBinIds(ids);
+              console.log('Found existing bins:', Object.keys(ids));
+            }
+          }
+        }
+      } catch(e) {
+        console.warn('Could not search bins:', e);
+      }
+    }
+
     const needsInit = COLLECTIONS.some(c => !ids[c]);
 
     if(needsInit) {
@@ -1005,9 +1071,12 @@ async function initDB() {
           try {
             const def = getDefault(col);
             const binId = await createBin('ps-' + col, def);
-            if(binId) { ids[col] = binId; _cache[col] = def; }
+            if(binId) {
+              ids[col] = binId;
+              _cache[col] = def;
+            }
             saveBinIds(ids);
-            await new Promise(r => setTimeout(r, 600));
+            await new Promise(r => setTimeout(r, 700));
           } catch(e) {
             console.error('Bin create failed:', col, e.message);
           }
@@ -1016,14 +1085,23 @@ async function initDB() {
     } else {
       showLoading('Se încarcă datele...');
       await Promise.all(COLLECTIONS.map(async col => {
-        try { const data = await readBin(ids[col]); _cache[col] = data; }
-        catch(e) { console.warn('Load err', col); _cache[col] = getDefault(col); }
+        try {
+          const data = await readBin(ids[col]);
+          _cache[col] = data;
+        } catch(e) {
+          console.warn('Load err', col);
+          _cache[col] = getDefault(col);
+        }
       }));
     }
-    if(!_cache['config'] || typeof _cache['config'] !== 'object') _cache['config'] = getDefault('config');
+
+    if(!_cache['config'] || typeof _cache['config'] !== 'object') {
+      _cache['config'] = getDefault('config');
+    }
     if(!_cache['config'].cod) _cache['config'].cod = genCod();
     hideLoading();
-    console.log('✓ Cloud DB ready');
+    console.log('✓ Cloud DB ready, bins:', ids);
+
   } catch(e) {
     hideLoading();
     console.error('DB init error:', e);
