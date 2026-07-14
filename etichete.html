@@ -272,11 +272,44 @@ textarea{resize:vertical;min-height:64px;}
   text-transform:uppercase;letter-spacing:.03em;line-height:1.12;overflow-wrap:break-word;min-width:0;}
 .bnr-imgs{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:.6em;
   min-height:0;height:100%;position:relative;}
-.bnr-imgs img{height:92%;object-fit:contain;
-  filter:drop-shadow(0 .3em .55em rgba(20,0,40,.32));border-radius:.3em;}
+.bnr-imgs img{height:92%;object-fit:cover;
+  filter:drop-shadow(0 .3em .55em rgba(20,0,40,.32));}
+/* fotografii dreptunghiulare: ramă albă rotunjită, ca un card foto */
+.bnr-imgs img.framed{border-radius:.9em;border:.14em solid rgba(255,255,255,.92);
+  box-shadow:0 .3em .7em rgba(20,0,40,.3);filter:none;aspect-ratio:3/4;}
+/* PNG-uri decupate (fundal transparent): plutesc libere, doar cu umbră */
+.bnr-imgs img.cutout{object-fit:contain;}
 .bnr-imgs.n1 img{max-width:78%;}
 .bnr-imgs.n2 img{max-width:46%;}
 .bnr-imgs.n3 img{max-width:31%;}
+
+/* ——— format LAT (ex. 2×1 m): două coloane ——— */
+.bnr.wide .bnr-wrow{display:flex;flex:1 1 auto;gap:1.2em;min-height:0;align-items:stretch;}
+.bnr.wide.hasqr .bnr-wrow{padding-right:5.4em;}
+.bnr.wide .bnr-wleft{flex:1 1 52%;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+.bnr.wide .bnr-wrow .bnr-imgs{flex:1 1 48%;height:auto;}
+.bnr.wide .bnr-title{font-size:2.7em;padding:0 .3em;}
+.bnr.wide.hasqr .bnr-title{padding:0 .3em;}
+.bnr.wide .bnr-swash{margin:.1em auto 0;}
+.bnr.wide.hasqr .bnr-swash{margin-right:auto;}
+.bnr.wide.hasqr .bnr-tag{padding:0 .5em;}
+.bnr.wide .bnr-feats{max-width:100%;margin:.9em auto 0;flex:0 0 auto;}
+.bnr.wide .bnr-cta{margin-top:1em;}
+.bnr.wide .bnr-imgs img{height:86%;}
+
+/* ——— format ÎNALT (roll-up): poze mari la mijloc, beneficii dedesubt ——— */
+.bnr.tall .bnr-title{font-size:2.9em;}
+.bnr.tall .bnr-imgs{flex:1.3 1 0;height:auto;min-height:0;margin-top:.8em;
+  align-items:center;flex-wrap:wrap;align-content:center;}
+.bnr.tall .bnr-imgs img{height:88%;}
+/* la roll-up, fotografiile se așază după lățime ca să nu fie decupate (2 sus + 1 jos) */
+.bnr.tall .bnr-imgs img.framed{height:auto;max-height:94%;}
+.bnr.tall .bnr-imgs.n3 img.framed{width:40%;max-width:40%;max-height:47%;}
+.bnr.tall .bnr-imgs.n2 img.framed{width:44%;}
+.bnr.tall .bnr-imgs.n1 img.framed{width:68%;}
+.bnr.tall .bnr-feats{flex:0 0 auto;max-width:86%;margin:1em auto 0;}
+.bnr.tall .bnr-feat .ft{font-size:1.05em;}
+.bnr.tall .bnr-cta{margin-top:1.1em;}
 /* umbră de contact sub produse */
 .bnr-imgs::after{content:'';position:absolute;left:12%;right:12%;bottom:1%;height:5%;z-index:0;
   background:radial-gradient(ellipse at 50% 50%,rgba(20,0,40,.28) 0,transparent 70%);}
@@ -718,7 +751,7 @@ function fmtPrice(p){
 function todayRO(ts){const d=ts?new Date(ts):new Date();
   return d.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'});}
 
-/* comprimă o imagine la max px și o întoarce ca dataURL jpeg */
+/* comprimă o imagine la max px; păstrează PNG dacă are transparență (poze decupate) */
 function compressImage(file,maxPx,cb){
   const r=new FileReader();
   r.onload=e=>{
@@ -728,8 +761,16 @@ function compressImage(file,maxPx,cb){
       const sc=Math.min(1,maxPx/Math.max(w,h));
       w=Math.round(w*sc);h=Math.round(h*sc);
       const c=document.createElement('canvas');c.width=w;c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      cb(c.toDataURL('image/jpeg',0.82));
+      const ctx=c.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      // detectăm transparența în colțuri și centru-sus
+      let hasAlpha=false;
+      try{
+        for(const [px,py] of [[0,0],[w-1,0],[0,h-1],[w-1,h-1],[w>>1,0]]){
+          if(ctx.getImageData(px,py,1,1).data[3]<250){hasAlpha=true;break;}
+        }
+      }catch(err){}
+      cb(hasAlpha?c.toDataURL('image/png'):c.toDataURL('image/jpeg',0.82));
     };
     img.src=e.target.result;
   };
@@ -861,47 +902,54 @@ function buildBanner(d,forPrint){
     el.appendChild(q);
   }
 
-  if(d.name){
-    const t=document.createElement('div');t.className='bnr-title';t.textContent=d.name;el.appendChild(t);
-    const sw=document.createElement('div');sw.className='bnr-swash';sw.innerHTML=svgSwash(theme.fg);el.appendChild(sw);
-  }
-  if(d.showDesc&&d.desc){
+  /* ——— componente, asamblate diferit după forma bannerului ——— */
+  const mkTitle=()=>{
+    if(!d.name)return null;
+    const box=document.createElement('div');
+    const t=document.createElement('div');t.className='bnr-title';t.textContent=d.name;box.appendChild(t);
+    const sw=document.createElement('div');sw.className='bnr-swash';sw.innerHTML=svgSwash(theme.fg);box.appendChild(sw);
+    return box;
+  };
+  const mkTag=()=>{
+    if(!(d.showDesc&&d.desc))return null;
     const tg=document.createElement('div');tg.className='bnr-tag';
     const r1=document.createElement('span');r1.className='tr';
     const tx=document.createElement('span');tx.textContent=d.desc;
     const r2=document.createElement('span');r2.className='tr';
     tg.appendChild(r1);tg.appendChild(tx);tg.appendChild(r2);
-    el.appendChild(tg);
-  }
-
+    return tg;
+  };
   const feats=(d.feats||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const mkFeats=()=>{
+    if(!feats.length)return null;
+    const fc=document.createElement('div');fc.className='bnr-feats';
+    feats.forEach((line,i)=>{
+      const f=document.createElement('div');f.className='bnr-feat';
+      const ic=document.createElement('div');ic.className='fi';
+      const icol=theme.icons[i%theme.icons.length];
+      ic.style.background='linear-gradient(135deg,'+lighten(icol,.35)+','+icol+')';
+      // dacă rândul începe cu emoji, îl folosim ca iconiță
+      const m=line.match(/^(\p{Extended_Pictographic}(?:️)?)\s*/u);
+      let txt=line;
+      if(m){ic.textContent=m[1];txt=line.slice(m[0].length);}
+      else ic.textContent=FEAT_GLYPHS[i%FEAT_GLYPHS.length];
+      const ft=document.createElement('div');ft.className='ft';ft.textContent=txt;
+      f.appendChild(ic);f.appendChild(ft);fc.appendChild(f);
+    });
+    return fc;
+  };
   const photos=(d.photos||[]).filter(Boolean);
   const showImgs=d.showPhoto&&photos.length;
-  if(feats.length||showImgs){
-    const mid=document.createElement('div');mid.className='bnr-mid';
-    if(feats.length){
-      const fc=document.createElement('div');fc.className='bnr-feats';
-      feats.forEach((line,i)=>{
-        const f=document.createElement('div');f.className='bnr-feat';
-        const ic=document.createElement('div');ic.className='fi';
-        const icol=theme.icons[i%theme.icons.length];
-        ic.style.background='linear-gradient(135deg,'+lighten(icol,.35)+','+icol+')';
-        // dacă rândul începe cu emoji, îl folosim ca iconiță
-        const m=line.match(/^(\p{Extended_Pictographic}(?:️)?)\s*/u);
-        let txt=line;
-        if(m){ic.textContent=m[1];txt=line.slice(m[0].length);}
-        else ic.textContent=FEAT_GLYPHS[i%FEAT_GLYPHS.length];
-        const ft=document.createElement('div');ft.className='ft';ft.textContent=txt;
-        f.appendChild(ic);f.appendChild(ft);fc.appendChild(f);
-      });
-      mid.appendChild(fc);
-    }
+  const mkImgs=()=>{
+    if(!showImgs&&!fmtPrice(d.price))return null;
     const iw=document.createElement('div');
     iw.className='bnr-imgs n'+Math.min(3,Math.max(1,photos.length));
     if(showImgs)photos.slice(0,3).forEach(src=>{
-      const im=document.createElement('img');im.src=src;im.alt='';iw.appendChild(im);
+      const im=document.createElement('img');im.src=src;im.alt='';
+      // pozele cu transparență (PNG decupat) plutesc libere; fotografiile primesc ramă
+      im.className=src.startsWith('data:image/png')?'cutout':'framed';
+      iw.appendChild(im);
     });
-    // steaua de preț
     const curP=fmtPrice(d.price);
     if(curP){
       const pb=document.createElement('div');pb.className='bnr-price';
@@ -917,17 +965,47 @@ function buildBanner(d,forPrint){
       pu.textContent=(d.currency||'lei')+(d.unit?' / '+d.unit:'');pb.appendChild(pu);
       iw.appendChild(pb);
     }
-    mid.appendChild(iw);
-    el.appendChild(mid);
-  }else{
-    const sp=document.createElement('div');sp.style.flex='1 1 auto';el.appendChild(sp);
-  }
+    return iw;
+  };
+  const mkCta=()=>{
+    if(!d.cta)return null;
+    const c=document.createElement('div');c.className='bnr-cta';c.textContent=d.cta;return c;
+  };
+  const mkFoot=()=>{
+    const footTxts=[];
+    if(d.validity)footTxts.push('Valabil până la '+todayRO(d.validity+'T12:00:00'));
+    if(d.footer)footTxts.push(d.footer);
+    if(!footTxts.length)return null;
+    const f=document.createElement('div');f.className='bnr-footer';f.textContent=footTxts.join(' • ');return f;
+  };
+  const add=(parent,...nodes)=>nodes.forEach(n=>{if(n)parent.appendChild(n);});
 
-  if(d.cta){const c=document.createElement('div');c.className='bnr-cta';c.textContent=d.cta;el.appendChild(c);}
-  const footTxts=[];
-  if(d.validity)footTxts.push('Valabil până la '+todayRO(d.validity+'T12:00:00'));
-  if(d.footer)footTxts.push(d.footer);
-  if(footTxts.length){const f=document.createElement('div');f.className='bnr-footer';f.textContent=footTxts.join(' • ');el.appendChild(f);}
+  const ratio=w/h;
+  if(ratio>1.55){
+    /* ——— banner LAT: texte în stânga, poze mari în dreapta ——— */
+    el.classList.add('wide');
+    const row=document.createElement('div');row.className='bnr-wrow';
+    const left=document.createElement('div');left.className='bnr-wleft';
+    add(left,mkTitle(),mkTag(),mkFeats(),mkCta());
+    const imgs=mkImgs();
+    add(row,left);if(imgs)add(row,imgs);
+    add(el,row,mkFoot());
+  }else if(ratio<0.62){
+    /* ——— banner ÎNALT (roll-up): poze mari la mijloc, beneficii sub ele ——— */
+    el.classList.add('tall');
+    add(el,mkTitle(),mkTag(),mkImgs(),mkFeats(),mkCta(),mkFoot());
+  }else{
+    /* ——— format apropiat de pătrat: beneficii stânga, poze dreapta ——— */
+    const fc=mkFeats(),iw=mkImgs();
+    add(el,mkTitle(),mkTag());
+    if(fc||iw){
+      const mid=document.createElement('div');mid.className='bnr-mid';
+      add(mid,fc,iw);el.appendChild(mid);
+    }else{
+      const sp=document.createElement('div');sp.style.flex='1 1 auto';el.appendChild(sp);
+    }
+    add(el,mkCta(),mkFoot());
+  }
   return el;
 }
 
@@ -1031,6 +1109,7 @@ function readForm(){
     photos:photos.filter(Boolean),
     feats:$('fFeats').value,
     cta:$('fCta').value.trim(),
+    aiImgPrompt:aiImgPrompt,
     qrLink:$('fQrLink').value.trim(),
     qrTop:$('fQrTop').value.trim(),
     qrBottom:$('fQrBottom').value.trim(),
@@ -1067,6 +1146,7 @@ function fillForm(d){
   renderPhotoSlots();
   $('fFeats').value=d.feats||'';
   $('fCta').value=d.cta||'';
+  aiImgPrompt=d.aiImgPrompt||'';
   $('fQrLink').value=d.qrLink||'';
   $('fQrTop').value=d.qrTop||'';
   $('fQrBottom').value=d.qrBottom||'';
@@ -1279,14 +1359,16 @@ $('btnAiText').addEventListener('click',async()=>{
   if(!descr){toast('Scrie mai întâi o descriere a afacerii / produsului');return;}
   const btn=$('btnAiText');btnBusy(btn,true,'✨ AI lucrează…');
   const isBanner=curKind==='banner';
-  const prompt='Ești un designer de reclame român. Pe baza acestei descrieri: "'+descr+'" '+
+  const prompt='Ești un designer de reclame român premiat. Pe baza acestei descrieri: "'+descr+'" '+
     'creează conținut pentru '+(isBanner?'un banner publicitar stradal':'o etichetă de preț')+'. '+
     'Răspunde DOAR cu un obiect JSON valid, fără alt text, cu exact aceste chei: '+
     '{"title":"numele scurt și atrăgător al brandului sau produsului (max 3 cuvinte)",'+
     '"slogan":"slogan de 3-4 cuvinte scurte despărțite prin punct, cu MAJUSCULE, ex: RĂCORIRE. BUBBLE. BUCURIE.",'+
     '"benefits":["exact 4 beneficii foarte scurte (2-4 cuvinte), fiecare începând cu un emoji potrivit"],'+
     '"cta":"un îndemn scurt și energic pentru client, max 5 cuvinte",'+
-    '"price":"prețul numeric dacă apare în descriere, altfel null"}';
+    '"price":"prețul numeric dacă apare în descriere, altfel null",'+
+    '"theme":"alege tema de culori cea mai potrivită produsului, exact una dintre: pastel (dulciuri, cofetărie, produse pentru copii), sunset (patiserie, cafea, fast-food, produse calde), fresh (legume, fructe, produse naturale, eco), ocean (pește, băuturi reci, servicii, tehnologie), noapte (baruri, evenimente, electronice, premium)",'+
+    '"image_prompt":"descriere fotografică în limba ENGLEZĂ a produsului, foarte concretă și vizuală, pentru un generator de imagini: obiectul exact, culori, textură, context — ex: glass cup of purple taro bubble tea with tapioca pearls and pastel straw"}';
   try{
     const r=await fetch('https://text.pollinations.ai/'+encodeURIComponent(prompt));
     if(!r.ok)throw new Error('serviciul AI a răspuns cu eroare '+r.status);
@@ -1299,10 +1381,12 @@ $('btnAiText').addEventListener('click',async()=>{
     if(isBanner){
       if(Array.isArray(j.benefits)&&j.benefits.length)$('fFeats').value=j.benefits.map(String).join('\n');
       if(j.cta)$('fCta').value=String(j.cta);
+      if(j.theme&&THEMES_BANNER.some(t=>t.id===j.theme)){curTheme=j.theme;renderThemeGrid();}
     }
     if(j.price!=null&&j.price!==''&&!isNaN(parseFloat(j.price)))$('fPrice').value=parseFloat(j.price);
+    if(j.image_prompt)aiImgPrompt=String(j.image_prompt);
     renderPreview();
-    toast('✨ Conținut generat de AI — ajustează ce vrei');
+    toast('✨ Conținut generat de AI — acum apasă „Generează poze cu AI"');
   }catch(e){
     toast('⚠ AI indisponibil ('+e.message+') — încearcă din nou sau folosește ⚡ Rapid');
   }
@@ -1310,21 +1394,26 @@ $('btnAiText').addEventListener('click',async()=>{
 });
 
 /* generare poze de produs cu AI */
+let aiImgPrompt='';   // promptul fotografic scris de AI la generarea textelor
 $('btnAiImgs').addEventListener('click',async()=>{
   const name=$('fName').value.trim();
-  if(!name){toast('Completează mai întâi numele produsului / titlul');return;}
+  if(!name&&!aiImgPrompt){toast('Completează mai întâi numele produsului / titlul');return;}
   const n=curKind==='banner'?3:1;
   if(photos.filter(Boolean).length&&!confirm('Pozele existente vor fi înlocuite cu poze generate de AI. Continui?'))return;
   const btn=$('btnAiImgs');
-  const subj=name+($('fDesc').value.trim()?', '+$('fDesc').value.trim():'');
+  // folosim promptul fotografic al AI-ului dacă există; altfel numele + descrierea
+  const subj=aiImgPrompt||(name+($('fDesc').value.trim()?', '+$('fDesc').value.trim():''));
+  const ANGLES=['hero shot, centered composition','three-quarter angle view','close-up detail shot'];
   try{
     for(let i=0;i<n;i++){
       btnBusy(btn,true,'✨ Generez poza '+(i+1)+'/'+n+'…');
-      const prompt='professional advertising product photography of '+subj+
-        ', appetizing vibrant colors, studio lighting, centered product, clean soft background, high quality, no text'+
-        (n>1?', variation '+(i+1):'');
+      const prompt='award-winning commercial product photography, '+subj+
+        ', '+ANGLES[i%ANGLES.length]+
+        ', studio softbox lighting, appetizing rich colors, ultra detailed, sharp focus'+
+        ', clean seamless studio background, professional advertising campaign quality'+
+        ', no text, no watermark, no logo, no hands';
       const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+
-        '?width=640&height=896&nologo=true&seed='+Math.floor(Math.random()*1e6);
+        '?width=768&height=1024&nologo=true&enhance=true&model=flux&seed='+Math.floor(Math.random()*1e6);
       const r=await fetch(url);
       if(!r.ok)throw new Error('serviciul AI a răspuns cu eroare '+r.status);
       const blob=await r.blob();
