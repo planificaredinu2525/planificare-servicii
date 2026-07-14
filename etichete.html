@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Etichete Comerciale — Generator</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&family=Share+Tech+Mono&family=Pacifico&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <style>
 :root{
   --bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
@@ -205,6 +206,108 @@ textarea{resize:vertical;min-height:64px;}
 .lt-albastru .lbl-badge{background:#1565c0;color:#fff;}
 .lt-albastru .lbl-disc{background:#1565c0;color:#fff;}
 
+/* =========================================================
+   BANNER RECLAMĂ — stil ca un banner stradal
+   ========================================================= */
+.bnr{position:relative;display:flex;flex-direction:column;overflow:hidden;
+  font-family:'Barlow',sans-serif;box-sizing:border-box;
+  padding:1.1em;line-height:1.15;flex-shrink:0;}
+.bnr.cut{outline:1px dashed #999;outline-offset:-1px;}
+.bnr-title{font-family:'Pacifico',cursive;font-size:2.8em;line-height:1.3;text-align:center;
+  padding:0 .4em;word-break:break-word;text-shadow:0 .02em .06em rgba(0,0,0,.12);}
+.bnr-tag{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.05em;
+  letter-spacing:.28em;text-transform:uppercase;text-align:center;margin-top:.5em;}
+/* când există QR, titlul și sloganul stau centrat în zona din stânga cardului QR */
+.bnr.hasqr .bnr-title{padding:0 2.5em 0 .5em;}
+.bnr.hasqr .bnr-tag{padding:0 7em 0 1.4em;}
+.bnr-qr{position:absolute;top:.9em;right:.9em;background:#fff;border-radius:.45em;
+  padding:.45em .5em;text-align:center;box-shadow:0 .15em .5em rgba(0,0,0,.18);z-index:3;}
+.bnr-qr .qt{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.55em;
+  letter-spacing:.1em;color:#222;text-transform:uppercase;white-space:nowrap;}
+.bnr-qr canvas{width:4.2em;height:4.2em;display:block;margin:.25em auto;image-rendering:pixelated;}
+.bnr-mid{display:flex;gap:1em;align-items:center;flex:1 1 auto;min-height:0;margin-top:1em;overflow:hidden;}
+.bnr-feats{display:flex;flex-direction:column;gap:.8em;flex:0 0 auto;max-width:40%;
+  max-height:100%;justify-content:center;}
+.bnr-feat{display:flex;align-items:center;gap:.55em;}
+.bnr-feat .fi{width:1.95em;height:1.95em;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:1em;color:#fff;flex-shrink:0;
+  box-shadow:0 .1em .3em rgba(0,0,0,.15);}
+.bnr-feat .ft{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95em;
+  text-transform:uppercase;letter-spacing:.03em;line-height:1.12;overflow-wrap:break-word;min-width:0;}
+.bnr-imgs{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:.6em;
+  min-height:0;height:100%;position:relative;}
+.bnr-imgs img{height:92%;object-fit:contain;
+  filter:drop-shadow(0 .25em .5em rgba(0,0,0,.28));border-radius:.3em;}
+.bnr-imgs.n1 img{max-width:78%;}
+.bnr-imgs.n2 img{max-width:46%;}
+.bnr-imgs.n3 img{max-width:31%;}
+.bnr-price{position:absolute;bottom:.2em;right:.2em;border-radius:50%;
+  width:5.4em;height:5.4em;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;color:#fff;transform:rotate(7deg);z-index:2;
+  box-shadow:0 .18em .5em rgba(0,0,0,.3);text-align:center;}
+.bnr-price .po{font-size:.75em;text-decoration:line-through;opacity:.85;line-height:1;}
+.bnr-price .pv{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.75em;line-height:1;}
+.bnr-price .pu{font-size:.68em;opacity:.95;line-height:1.2;}
+.bnr-cta{align-self:center;margin-top:1.1em;color:#fff;font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;font-size:1.4em;letter-spacing:.1em;text-transform:uppercase;
+  padding:.42em 1.5em;border-radius:2em;box-shadow:0 .12em .4em rgba(0,0,0,.2);text-align:center;}
+.bnr-footer{text-align:center;font-size:.72em;opacity:.75;margin-top:.7em;}
+
+/* Teme banner (gradiente + accente) */
+.bt-pastel{background:
+  radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
+  radial-gradient(circle at 88% 90%,rgba(240,170,255,.4) 0,transparent 45%),
+  linear-gradient(135deg,#fce9f2 0%,#e5d6f8 55%,#f9d3e7 100%);color:#4a1d6e;}
+.bt-pastel .bnr-tag{color:#5b2a86;}
+.bt-pastel .bnr-cta{background:#7b3fa0;}
+.bt-pastel .bnr-price{background:#e91e63;}
+
+.bt-sunset{background:
+  radial-gradient(circle at 15% 10%,rgba(255,255,255,.55) 0,transparent 40%),
+  radial-gradient(circle at 85% 92%,rgba(255,120,50,.28) 0,transparent 45%),
+  linear-gradient(135deg,#fff3d6 0%,#ffdba5 55%,#ffc98a 100%);color:#7a2e00;}
+.bt-sunset .bnr-tag{color:#a34700;}
+.bt-sunset .bnr-cta{background:#e65100;}
+.bt-sunset .bnr-price{background:#c62828;}
+
+.bt-fresh{background:
+  radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
+  radial-gradient(circle at 88% 90%,rgba(120,220,140,.3) 0,transparent 45%),
+  linear-gradient(135deg,#eafaf0 0%,#cdeed8 55%,#bfe8cf 100%);color:#0d4d1f;}
+.bt-fresh .bnr-tag{color:#1b5e20;}
+.bt-fresh .bnr-cta{background:#2e7d32;}
+.bt-fresh .bnr-price{background:#ef6c00;}
+
+.bt-ocean{background:
+  radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
+  radial-gradient(circle at 88% 90%,rgba(90,170,255,.3) 0,transparent 45%),
+  linear-gradient(135deg,#e8f3fd 0%,#cfe4fa 55%,#bcd9f7 100%);color:#0b3061;}
+.bt-ocean .bnr-tag{color:#0d47a1;}
+.bt-ocean .bnr-cta{background:#1565c0;}
+.bt-ocean .bnr-price{background:#e91e63;}
+
+.bt-noapte{background:
+  radial-gradient(circle at 15% 10%,rgba(120,80,255,.3) 0,transparent 42%),
+  radial-gradient(circle at 85% 90%,rgba(255,60,130,.25) 0,transparent 45%),
+  linear-gradient(135deg,#191932 0%,#1f1440 55%,#2a1230 100%);color:#fff;}
+.bt-noapte .bnr-tag{color:#d9c7ff;}
+.bt-noapte .bnr-cta{background:#e94560;}
+.bt-noapte .bnr-price{background:#ffb300;color:#1a1a2e;}
+
+/* Comutator tip etichetă */
+.kind-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.ks{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);
+  font-family:var(--cond);font-size:15px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;padding:12px 8px;cursor:pointer;transition:.15s;}
+.ks:hover{border-color:var(--text3);}
+.ks.sel{border-color:var(--orange);background:var(--od);color:var(--orange);}
+.ks .kd{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  color:var(--text3);text-transform:none;margin-top:3px;}
+
+.photo-slots{display:grid;grid-template-columns:1fr;gap:8px;}
+.photo-slots.multi{grid-template-columns:repeat(3,1fr);}
+.photo-slots.multi .photo-drop img{max-height:70px;}
+
 /* ===== PRINT ===== */
 #printArea{display:none;}
 @media print{
@@ -239,6 +342,10 @@ textarea{resize:vertical;min-height:64px;}
 <section class="page active" id="page-editor">
   <div class="cols">
     <div>
+      <div class="kind-switch">
+        <button class="ks sel" id="kindPrice">🏷 Etichetă preț<span class="kd">raft, vitrină, promoții</span></button>
+        <button class="ks" id="kindBanner">🪧 Banner reclamă<span class="kd">titlu, beneficii, poze, QR</span></button>
+      </div>
       <div class="card">
         <div class="card-h"><div class="dot"></div><h3>Generare rapidă din descriere</h3></div>
         <div class="card-b">
@@ -254,17 +361,13 @@ textarea{resize:vertical;min-height:64px;}
       <div class="card">
         <div class="card-h"><div class="dot"></div><h3>Produs</h3></div>
         <div class="card-b">
-          <label class="fl">Nume produs</label>
+          <label class="fl" id="lblName">Nume produs</label>
           <input type="text" id="fName" placeholder="Ex: Cașcaval Dalia 450g">
-          <label class="fl">Descriere (opțional)</label>
+          <label class="fl" id="lblDesc">Descriere (opțional)</label>
           <textarea id="fDesc" rows="2" placeholder="Ex: Produs românesc, maturat 60 de zile"></textarea>
-          <label class="fl">Poză produs</label>
-          <div class="photo-drop" id="prodPhotoDrop">
-            <img id="prodPhotoImg" style="display:none;" alt="">
-            <button class="photo-x" id="prodPhotoX" style="display:none;">✕</button>
-            <div class="ph-txt" id="prodPhotoTxt">📷 Apasă pentru poză produs (cameră sau fișier)</div>
-            <input type="file" id="prodPhotoInput" accept="image/*" style="display:none;">
-          </div>
+          <label class="fl" id="lblPhotos">Poză produs</label>
+          <div class="photo-slots" id="photoSlots"></div>
+          <input type="file" id="prodPhotoInput" accept="image/*" style="display:none;">
         </div>
       </div>
 
@@ -323,6 +426,31 @@ textarea{resize:vertical;min-height:64px;}
         </div>
       </div>
 
+      <div class="card" id="bannerCard" style="display:none;">
+        <div class="card-h"><div class="dot"></div><h3>Conținut banner</h3></div>
+        <div class="card-b">
+          <label class="fl">Beneficii / puncte forte (unul pe rând, poți începe cu emoji)</label>
+          <textarea id="fFeats" rows="4" placeholder="🍃 Ceai de calitate&#10;🧋 Perle tapioca&#10;😋 Arome delicioase&#10;❤ Bucură-te de fiecare înghițitură!"></textarea>
+          <label class="fl">Text buton jos (îndemn)</label>
+          <input type="text" id="fCta" placeholder="Ex: ALEGE GUSTUL TĂU PREFERAT!">
+          <div class="row3">
+            <div>
+              <label class="fl">Link cod QR</label>
+              <input type="text" id="fQrLink" placeholder="https://…">
+            </div>
+            <div>
+              <label class="fl">Text deasupra QR</label>
+              <input type="text" id="fQrTop" placeholder="SCANEAZĂ-MĂ!" maxlength="20">
+            </div>
+            <div>
+              <label class="fl">Text sub QR</label>
+              <input type="text" id="fQrBottom" placeholder="MENIU & NOUTĂȚI" maxlength="20">
+            </div>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;">Pune link-ul spre meniul tău / pagina de Facebook — codul QR se generează automat. Prețul (dacă îl completezi) apare ca o bulină rotundă peste poze.</p>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-h"><div class="dot"></div><h3>Dimensiune etichetă</h3></div>
         <div class="card-b">
@@ -345,7 +473,7 @@ textarea{resize:vertical;min-height:64px;}
         <div class="card-b">
           <label class="fl">Temă culoare</label>
           <div class="theme-grid" id="themeGrid"></div>
-          <div class="row2" style="margin-top:10px;">
+          <div class="row2" style="margin-top:10px;" id="badgeRow">
             <div>
               <label class="fl">Insignă (badge)</label>
               <select id="fBadge">
@@ -365,9 +493,9 @@ textarea{resize:vertical;min-height:64px;}
             </div>
           </div>
           <div style="margin-top:10px;">
-            <label class="chk"><input type="checkbox" id="fShowPhoto" checked> Arată poza produsului pe etichetă</label>
-            <label class="chk"><input type="checkbox" id="fShowDesc" checked> Arată descrierea</label>
-            <label class="chk"><input type="checkbox" id="fShowBarcode"> Arată cod de bare</label>
+            <label class="chk"><input type="checkbox" id="fShowPhoto" checked> <span id="lblShowPhoto">Arată poza produsului pe etichetă</span></label>
+            <label class="chk"><input type="checkbox" id="fShowDesc" checked> <span id="lblShowDesc">Arată descrierea</span></label>
+            <label class="chk" id="rowBarcode"><input type="checkbox" id="fShowBarcode"> Arată cod de bare</label>
             <label class="chk"><input type="checkbox" id="fCut" checked> Contur punctat pentru decupare (la print)</label>
           </div>
           <div class="row2" id="barcodeWrap" style="display:none;">
@@ -473,7 +601,7 @@ let locations=loadLS(LS_LOCS);
 let editingId=null;          // id-ul etichetei în editare (null = nouă)
 let selectedIds=new Set();   // selecție pentru print pe A4
 
-const SIZES=[
+const SIZES_PRICE=[
   {id:'s1',name:'Raft mic',w:60,h:40},
   {id:'s2',name:'Raft mediu',w:80,h:50},
   {id:'s3',name:'Raft mare',w:100,h:70},
@@ -481,15 +609,37 @@ const SIZES=[
   {id:'a5',name:'A5 afiș',w:148,h:210},
   {id:'a4',name:'A4 poster',w:210,h:297},
 ];
-const THEMES=[
-  {id:'alb',name:'Clasic',bg:'#fff',fg:'#c62828'},
-  {id:'galben',name:'Promo',bg:'#ffe733',fg:'#c62828'},
-  {id:'rosu',name:'Reducere',bg:'#c62828',fg:'#ffe733'},
-  {id:'negru',name:'Elegant',bg:'#141414',fg:'#d4af37'},
-  {id:'verde',name:'Eco',bg:'#f4fbf4',fg:'#2e7d32'},
-  {id:'albastru',name:'Tech',bg:'#eef4fb',fg:'#1565c0'},
+const SIZES_BANNER=[
+  {id:'b1',name:'Banner 50×50',w:500,h:500},
+  {id:'b2',name:'Banner 80×80',w:800,h:800},
+  {id:'b3',name:'Banner 1×1 m',w:1000,h:1000},
+  {id:'b4',name:'Orizontal 2×1 m',w:2000,h:1000},
+  {id:'b5',name:'Roll-up 85×200',w:850,h:2000},
+  {id:'b6',name:'Afiș A1',w:594,h:841},
 ];
-let curSize='s3', curTheme='alb';
+const THEMES_PRICE=[
+  {id:'alb',name:'Clasic',sw:'#fff',fg:'#c62828'},
+  {id:'galben',name:'Promo',sw:'#ffe733',fg:'#c62828'},
+  {id:'rosu',name:'Reducere',sw:'#c62828',fg:'#ffe733'},
+  {id:'negru',name:'Elegant',sw:'#141414',fg:'#d4af37'},
+  {id:'verde',name:'Eco',sw:'#f4fbf4',fg:'#2e7d32'},
+  {id:'albastru',name:'Tech',sw:'#eef4fb',fg:'#1565c0'},
+];
+const THEMES_BANNER=[
+  {id:'pastel',name:'Pastel',sw:'linear-gradient(135deg,#fce9f2,#e5d6f8,#f9d3e7)',fg:'#7b3fa0',
+   icons:['#7b3fa0','#e91e63','#43a047','#fb8c00']},
+  {id:'sunset',name:'Apus',sw:'linear-gradient(135deg,#fff3d6,#ffdba5,#ffc98a)',fg:'#e65100',
+   icons:['#e65100','#c62828','#f9a825','#6d4c41']},
+  {id:'fresh',name:'Fresh',sw:'linear-gradient(135deg,#eafaf0,#cdeed8,#bfe8cf)',fg:'#2e7d32',
+   icons:['#2e7d32','#00897b','#7cb342','#ef6c00']},
+  {id:'ocean',name:'Ocean',sw:'linear-gradient(135deg,#e8f3fd,#cfe4fa,#bcd9f7)',fg:'#1565c0',
+   icons:['#1565c0','#00838f','#5e35b1','#e91e63']},
+  {id:'noapte',name:'Noapte',sw:'linear-gradient(135deg,#191932,#1f1440,#2a1230)',fg:'#e94560',
+   icons:['#e94560','#9c27b0','#00bcd4','#ffb300']},
+];
+function sizesFor(kind){return kind==='banner'?SIZES_BANNER:SIZES_PRICE;}
+function themesFor(kind){return kind==='banner'?THEMES_BANNER:THEMES_PRICE;}
+let curKind='price', curSize='s3', curTheme='alb';
 
 /* =========================================================
    HELPERS
@@ -558,9 +708,114 @@ function drawBarcode(canvas,text,hPx){
 }
 
 /* =========================================================
+   COD QR (folosește qrcode-generator de pe CDN)
+   ========================================================= */
+function drawQR(canvas,text){
+  try{
+    if(typeof qrcode==='undefined')throw new Error('offline');
+    const qr=qrcode(0,'M');qr.addData(text);qr.make();
+    const n=qr.getModuleCount(),cell=4,quiet=3;
+    const sz=(n+quiet*2)*cell;
+    canvas.width=canvas.height=sz;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
+    ctx.fillStyle='#000';
+    for(let r=0;r<n;r++)for(let c=0;c<n;c++)
+      if(qr.isDark(r,c))ctx.fillRect((c+quiet)*cell,(r+quiet)*cell,cell,cell);
+  }catch(e){
+    canvas.width=canvas.height=100;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#eee';ctx.fillRect(0,0,100,100);
+    ctx.fillStyle='#999';ctx.font='16px sans-serif';ctx.textAlign='center';
+    ctx.fillText('QR',50,55);
+  }
+}
+
+/* =========================================================
+   CONSTRUIRE BANNER RECLAMĂ (DOM)
+   ========================================================= */
+const FEAT_GLYPHS=['✓','★','♥','☀'];
+function buildBanner(d,forPrint){
+  const el=document.createElement('div');
+  el.className='bnr bt-'+(d.theme||'pastel')+(d.qrLink?' hasqr':'')+((d.cut&&forPrint!=='png')?' cut':'');
+  const w=+d.w||800,h=+d.h||800;
+  el.style.width=w+'mm';el.style.height=h+'mm';
+  const base=Math.min(w,h)/30;
+  el.style.fontSize=base.toFixed(2)+'mm';
+  const theme=THEMES_BANNER.find(t=>t.id===d.theme)||THEMES_BANNER[0];
+
+  if(d.qrLink){
+    const q=document.createElement('div');q.className='bnr-qr';
+    const t1=document.createElement('div');t1.className='qt';t1.textContent=d.qrTop||'SCANEAZĂ-MĂ!';
+    const cv=document.createElement('canvas');drawQR(cv,d.qrLink);
+    const t2=document.createElement('div');t2.className='qt';t2.textContent=d.qrBottom||'';
+    q.appendChild(t1);q.appendChild(cv);if(d.qrBottom)q.appendChild(t2);
+    el.appendChild(q);
+  }
+
+  if(d.name){const t=document.createElement('div');t.className='bnr-title';t.textContent=d.name;el.appendChild(t);}
+  if(d.showDesc&&d.desc){const tg=document.createElement('div');tg.className='bnr-tag';tg.textContent=d.desc;el.appendChild(tg);}
+
+  const feats=(d.feats||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const photos=(d.photos||[]).filter(Boolean);
+  const showImgs=d.showPhoto&&photos.length;
+  if(feats.length||showImgs){
+    const mid=document.createElement('div');mid.className='bnr-mid';
+    if(feats.length){
+      const fc=document.createElement('div');fc.className='bnr-feats';
+      feats.forEach((line,i)=>{
+        const f=document.createElement('div');f.className='bnr-feat';
+        const ic=document.createElement('div');ic.className='fi';
+        ic.style.background=theme.icons[i%theme.icons.length];
+        // dacă rândul începe cu emoji, îl folosim ca iconiță
+        const m=line.match(/^(\p{Extended_Pictographic}(?:️)?)\s*/u);
+        let txt=line;
+        if(m){ic.textContent=m[1];txt=line.slice(m[0].length);}
+        else ic.textContent=FEAT_GLYPHS[i%FEAT_GLYPHS.length];
+        const ft=document.createElement('div');ft.className='ft';ft.textContent=txt;
+        f.appendChild(ic);f.appendChild(ft);fc.appendChild(f);
+      });
+      mid.appendChild(fc);
+    }
+    const iw=document.createElement('div');
+    iw.className='bnr-imgs n'+Math.min(3,Math.max(1,photos.length));
+    if(showImgs)photos.slice(0,3).forEach(src=>{
+      const im=document.createElement('img');im.src=src;im.alt='';iw.appendChild(im);
+    });
+    // bulina de preț
+    const curP=fmtPrice(d.price);
+    if(curP){
+      const pb=document.createElement('div');pb.className='bnr-price';
+      const oldP=fmtPrice(d.oldPrice);
+      if(oldP&&oldP.full>curP.full){
+        const po=document.createElement('div');po.className='po';
+        po.textContent=oldP.whole+','+oldP.dec;pb.appendChild(po);
+      }
+      const pv=document.createElement('div');pv.className='pv';
+      pv.textContent=curP.whole+','+curP.dec;pb.appendChild(pv);
+      const pu=document.createElement('div');pu.className='pu';
+      pu.textContent=(d.currency||'lei')+(d.unit?' / '+d.unit:'');pb.appendChild(pu);
+      iw.appendChild(pb);
+    }
+    mid.appendChild(iw);
+    el.appendChild(mid);
+  }else{
+    const sp=document.createElement('div');sp.style.flex='1 1 auto';el.appendChild(sp);
+  }
+
+  if(d.cta){const c=document.createElement('div');c.className='bnr-cta';c.textContent=d.cta;el.appendChild(c);}
+  const footTxts=[];
+  if(d.validity)footTxts.push('Valabil până la '+todayRO(d.validity+'T12:00:00'));
+  if(d.footer)footTxts.push(d.footer);
+  if(footTxts.length){const f=document.createElement('div');f.className='bnr-footer';f.textContent=footTxts.join(' • ');el.appendChild(f);}
+  return el;
+}
+
+/* =========================================================
    CONSTRUIRE ETICHETĂ (DOM) — folosită peste tot
    ========================================================= */
 function buildLabel(d,forPrint){
+  if(d.kind==='banner')return buildBanner(d,forPrint);
   const el=document.createElement('div');
   el.className='lbl lt-'+(d.theme||'alb')+((d.cut&&forPrint!=='png')?' cut':'');
   const w=+d.w||100,h=+d.h||70;
@@ -649,9 +904,16 @@ function buildLabel(d,forPrint){
 function readForm(){
   return {
     id:editingId||uid(),
+    kind:curKind,
     name:$('fName').value.trim(),
     desc:$('fDesc').value.trim(),
-    photo:prodPhoto,
+    photo:photos[0]||null,
+    photos:photos.filter(Boolean),
+    feats:$('fFeats').value,
+    cta:$('fCta').value.trim(),
+    qrLink:$('fQrLink').value.trim(),
+    qrTop:$('fQrTop').value.trim(),
+    qrBottom:$('fQrBottom').value.trim(),
     price:$('fPrice').value,
     oldPrice:$('fOldPrice').value,
     currency:$('fCurrency').value,
@@ -678,9 +940,16 @@ function readForm(){
 
 /* încarcă un obiect etichetă în formular */
 function fillForm(d){
+  setKind(d.kind==='banner'?'banner':'price',false);
   $('fName').value=d.name||'';
   $('fDesc').value=d.desc||'';
-  prodPhoto=d.photo||null;updateProdPhotoUI();
+  photos=(d.photos||(d.photo?[d.photo]:[])).slice(0,3);
+  renderPhotoSlots();
+  $('fFeats').value=d.feats||'';
+  $('fCta').value=d.cta||'';
+  $('fQrLink').value=d.qrLink||'';
+  $('fQrTop').value=d.qrTop||'';
+  $('fQrBottom').value=d.qrBottom||'';
   $('fPrice').value=d.price||'';
   $('fOldPrice').value=d.oldPrice||'';
   $('fCurrency').value=d.currency||'lei';
@@ -690,14 +959,15 @@ function fillForm(d){
   $('fW').value=d.w||100;
   $('fH').value=d.h||70;
   curSize=d.sizePreset||'custom';
-  curTheme=d.theme||'alb';
+  curTheme=d.theme||(curKind==='banner'?'pastel':'alb');
+  if(!themesFor(curKind).some(t=>t.id===curTheme))curTheme=themesFor(curKind)[0].id;
   $('fBadge').value=d.badge||'';
   $('fBadgeCustom').value=d.badgeCustom||'';
   $('badgeCustomWrap').style.display=d.badge==='custom'?'':'none';
   $('fShowPhoto').checked=d.showPhoto!==false;
   $('fShowDesc').checked=d.showDesc!==false;
   $('fShowBarcode').checked=!!d.showBarcode;
-  $('barcodeWrap').style.display=d.showBarcode?'':'none';
+  $('barcodeWrap').style.display=(d.showBarcode&&curKind!=='banner')?'':'none';
   $('fBarcodeVal').value=d.barcodeVal||'';
   $('fCut').checked=d.cut!==false;
   $('fValidity').value=d.validity||'';
@@ -723,7 +993,7 @@ function renderPreview(){
   box.style.transform='scale('+sc+')';
   box.style.width=pxW+'px';box.style.height=pxH+'px';
   stage.style.height=Math.max(260,pxH*sc+48)+'px';
-  $('previewInfo').textContent=d.w+' × '+d.h+' mm — scară '+Math.round(sc*100)+'% — temă: '+(THEMES.find(t=>t.id===curTheme)||{}).name;
+  $('previewInfo').textContent=d.w+' × '+d.h+' mm — scară '+Math.round(sc*100)+'% — temă: '+(themesFor(curKind).find(t=>t.id===curTheme)||{}).name;
   $('editingInfo').style.display=editingId?'':'none';
   if(editingId)$('editingInfo').textContent='✏ Editezi eticheta salvată — „Salvează" actualizează, „Etichetă nouă" pornește alta.';
 }
@@ -731,46 +1001,89 @@ function renderPreview(){
 /* =========================================================
    FORMULAR — evenimente
    ========================================================= */
-let prodPhoto=null;
-function updateProdPhotoUI(){
-  const img=$('prodPhotoImg'),txt=$('prodPhotoTxt'),x=$('prodPhotoX');
-  if(prodPhoto){img.src=prodPhoto;img.style.display='';x.style.display='';txt.textContent='Apasă pentru a schimba poza';}
-  else{img.style.display='none';x.style.display='none';txt.textContent='📷 Apasă pentru poză produs (cameră sau fișier)';}
+let photos=[];      // până la 3 poze (banner); eticheta de preț folosește doar prima
+let photoSlotIx=0;  // slotul în care se încarcă următoarea poză
+
+function renderPhotoSlots(){
+  const wrap=$('photoSlots');wrap.innerHTML='';
+  const nSlots=curKind==='banner'?3:1;
+  wrap.classList.toggle('multi',nSlots>1);
+  for(let i=0;i<nSlots;i++){
+    const slot=document.createElement('div');slot.className='photo-drop';
+    if(photos[i]){
+      const img=document.createElement('img');img.src=photos[i];img.alt='';slot.appendChild(img);
+      const x=document.createElement('button');x.className='photo-x';x.textContent='✕';
+      x.onclick=e=>{e.stopPropagation();photos.splice(i,1);renderPhotoSlots();renderPreview();};
+      slot.appendChild(x);
+      const t=document.createElement('div');t.className='ph-txt';t.textContent='Schimbă';slot.appendChild(t);
+    }else{
+      const t=document.createElement('div');t.className='ph-txt';
+      t.textContent=nSlots>1?'📷 Poza '+(i+1):'📷 Apasă pentru poză produs (cameră sau fișier)';
+      slot.appendChild(t);
+    }
+    slot.onclick=()=>{photoSlotIx=i;$('prodPhotoInput').click();};
+    wrap.appendChild(slot);
+  }
 }
-$('prodPhotoDrop').addEventListener('click',e=>{if(e.target.id!=='prodPhotoX')$('prodPhotoInput').click();});
 $('prodPhotoInput').addEventListener('change',e=>{
   const f=e.target.files[0];if(!f)return;
-  compressImage(f,800,url=>{prodPhoto=url;updateProdPhotoUI();renderPreview();});
+  compressImage(f,800,url=>{photos[photoSlotIx]=url;renderPhotoSlots();renderPreview();});
   e.target.value='';
 });
-$('prodPhotoX').addEventListener('click',e=>{e.stopPropagation();prodPhoto=null;updateProdPhotoUI();renderPreview();});
+
+/* comutare tip: etichetă preț / banner reclamă */
+function setKind(k,applyDefaults){
+  curKind=k;
+  const banner=k==='banner';
+  $('kindPrice').classList.toggle('sel',!banner);
+  $('kindBanner').classList.toggle('sel',banner);
+  $('bannerCard').style.display=banner?'':'none';
+  $('badgeRow').style.display=banner?'none':'';
+  $('rowBarcode').style.display=banner?'none':'';
+  $('barcodeWrap').style.display=(!banner&&$('fShowBarcode').checked)?'':'none';
+  $('lblName').textContent=banner?'Titlu banner (numele afacerii / produsului)':'Nume produs';
+  $('lblDesc').textContent=banner?'Slogan (apare sub titlu)':'Descriere (opțional)';
+  $('lblPhotos').textContent=banner?'Poze produse (până la 3)':'Poză produs';
+  $('lblShowPhoto').textContent=banner?'Arată pozele pe banner':'Arată poza produsului pe etichetă';
+  $('lblShowDesc').textContent=banner?'Arată sloganul':'Arată descrierea';
+  if(applyDefaults){
+    const s=banner?SIZES_BANNER[1]:SIZES_PRICE[2];
+    curSize=s.id;$('fW').value=s.w;$('fH').value=s.h;
+    curTheme=banner?'pastel':'alb';
+    $('fShowPhoto').checked=true;
+  }
+  if(!themesFor(k).some(t=>t.id===curTheme))curTheme=themesFor(k)[0].id;
+  renderPhotoSlots();renderSizeGrid();renderThemeGrid();renderPreview();
+}
+$('kindPrice').addEventListener('click',()=>setKind('price',true));
+$('kindBanner').addEventListener('click',()=>setKind('banner',true));
 
 function renderSizeGrid(){
   const g=$('sizeGrid');g.innerHTML='';
-  SIZES.forEach(s=>{
+  sizesFor(curKind).forEach(s=>{
     const b=document.createElement('div');
     b.className='size-opt'+(curSize===s.id?' sel':'');
     b.innerHTML='<span class="sn">'+s.name+'</span><span class="sd">'+s.w+'×'+s.h+' mm</span>';
     b.onclick=()=>{curSize=s.id;$('fW').value=s.w;$('fH').value=s.h;
       // la etichete mici ascundem implicit poza (nu încape frumos)
-      if(s.w<=80&&s.h<=50)$('fShowPhoto').checked=false;
+      if(curKind==='price'&&s.w<=80&&s.h<=50)$('fShowPhoto').checked=false;
       renderSizeGrid();renderPreview();};
     g.appendChild(b);
   });
 }
 function renderThemeGrid(){
   const g=$('themeGrid');g.innerHTML='';
-  THEMES.forEach(t=>{
+  themesFor(curKind).forEach(t=>{
     const b=document.createElement('div');
     b.className='theme-opt'+(curTheme===t.id?' sel':'');
-    b.style.background=t.bg;b.title=t.name;
+    b.style.background=t.sw;b.title=t.name;
     b.innerHTML='<span style="background:'+t.fg+';color:'+(t.id==='galben'||t.id==='negru'?'#141414':'#fff')+'">'+t.name+'</span>';
     b.onclick=()=>{curTheme=t.id;renderThemeGrid();renderPreview();};
     g.appendChild(b);
   });
 }
 
-['fName','fDesc','fPrice','fOldPrice','fCurrency','fUnit','fQty','fQtyUnit','fW','fH','fBadgeCustom','fBarcodeVal','fValidity','fFooter','fCopies']
+['fName','fDesc','fPrice','fOldPrice','fCurrency','fUnit','fQty','fQtyUnit','fW','fH','fBadgeCustom','fBarcodeVal','fValidity','fFooter','fCopies','fFeats','fCta','fQrLink','fQrTop','fQrBottom']
  .forEach(id=>$(id).addEventListener('input',()=>{if(id==='fW'||id==='fH')curSize='custom',renderSizeGrid();renderPreview();}));
 ['fShowPhoto','fShowDesc','fCut'].forEach(id=>$(id).addEventListener('change',renderPreview));
 $('fShowBarcode').addEventListener('change',()=>{$('barcodeWrap').style.display=$('fShowBarcode').checked?'':'none';renderPreview();});
@@ -808,6 +1121,7 @@ function parseDescription(txt){
     return noP.length>2;
   });
   out.desc=descLines.join(' • ');
+  out.descLines=descLines;
   return out;
 }
 $('btnQuick').addEventListener('click',()=>{
@@ -815,11 +1129,19 @@ $('btnQuick').addEventListener('click',()=>{
   if(!t){toast('Lipește mai întâi o descriere');return;}
   const p=parseDescription(t);
   if(p.name)$('fName').value=p.name;
-  if(p.desc)$('fDesc').value=p.desc;
+  if(curKind==='banner'){
+    // pe banner, rândurile devin beneficii; primul rând scurt = slogan
+    if(p.descLines.length){
+      if(p.descLines[0].length<=40&&p.descLines.length>1){
+        $('fDesc').value=p.descLines[0];
+        $('fFeats').value=p.descLines.slice(1).join('\n');
+      }else $('fFeats').value=p.descLines.join('\n');
+    }
+  }else if(p.desc)$('fDesc').value=p.desc;
   if(p.price!=='')$('fPrice').value=p.price;
   if(p.oldPrice!=='')$('fOldPrice').value=p.oldPrice;
   renderPreview();
-  toast('✓ Etichetă generată — verifică și ajustează câmpurile');
+  toast('✓ '+(curKind==='banner'?'Banner generat':'Etichetă generată')+' — verifică și ajustează câmpurile');
 });
 $('btnQuickClear').addEventListener('click',()=>{$('quickText').value='';});
 
@@ -841,8 +1163,11 @@ function saveLabel(){
 $('btnSave').addEventListener('click',saveLabel);
 $('btnNew').addEventListener('click',()=>{
   editingId=null;
-  fillForm({w:100,h:70,sizePreset:'s3',theme:'alb',showPhoto:true,showDesc:true,cut:true,copies:1});
-  toast('Editor golit — etichetă nouă');
+  if(curKind==='banner')
+    fillForm({kind:'banner',w:800,h:800,sizePreset:'b2',theme:'pastel',showPhoto:true,showDesc:true,cut:true,copies:1});
+  else
+    fillForm({kind:'price',w:100,h:70,sizePreset:'s3',theme:'alb',showPhoto:true,showDesc:true,cut:true,copies:1});
+  toast('Editor golit — de la zero');
 });
 
 function updateCounts(){
@@ -922,9 +1247,22 @@ $('btnPrintSel').addEventListener('click',()=>{
 function printLabels(list){
   const pa=$('printArea');pa.innerHTML='';
   const sheet=document.createElement('div');sheet.className='print-sheet';
+  const MAXW=194,MAXH=281; // zona utilă A4 cu margini de 8mm
   list.forEach(d=>{
     const copies=Math.max(1,+d.copies||1);
-    for(let i=0;i<copies;i++)sheet.appendChild(buildLabel(d,'print'));
+    for(let i=0;i<copies;i++){
+      const el=buildLabel(d,'print');
+      if(d.w>MAXW||d.h>MAXH){
+        // bannerele mari se printează scalate ca previzualizare pe A4
+        const sc=Math.min(MAXW/d.w,MAXH/d.h);
+        const wrap=document.createElement('div');
+        wrap.style.cssText='width:'+(d.w*sc)+'mm;height:'+(d.h*sc)+'mm;overflow:hidden;break-inside:avoid;page-break-inside:avoid;';
+        el.style.transform='scale('+sc+')';
+        el.style.transformOrigin='top left';
+        wrap.appendChild(el);
+        sheet.appendChild(wrap);
+      }else sheet.appendChild(el);
+    }
   });
   pa.appendChild(sheet);
   window.print();
@@ -943,7 +1281,8 @@ $('btnPng').addEventListener('click',async()=>{
   holder.appendChild(el);document.body.appendChild(holder);
   try{
     const pxW=d.w*MM;
-    const scale=Math.max(2,Math.min(6,900/pxW));
+    // țintim ~3000px lățime: net pentru tipografie, fără să blocăm browserul
+    const scale=Math.max(0.5,Math.min(6,3000/pxW));
     const cv=await html2canvas(el,{scale,backgroundColor:null,logging:false});
     const a=document.createElement('a');
     a.download='eticheta-'+(d.name||'produs').toLowerCase().replace(/[^a-z0-9ăâîșț]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,40)+'.png';
@@ -1038,7 +1377,7 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>show
    ========================================================= */
 renderSizeGrid();
 renderThemeGrid();
-updateProdPhotoUI();
+renderPhotoSlots();
 updateCounts();
 renderPreview();
 renderLabels();
