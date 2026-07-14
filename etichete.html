@@ -213,8 +213,26 @@ textarea{resize:vertical;min-height:64px;}
   font-family:'Barlow',sans-serif;box-sizing:border-box;
   padding:1.1em;line-height:1.15;flex-shrink:0;}
 .bnr.cut{outline:1px dashed #999;outline-offset:-1px;}
-.bnr-title{font-family:'Pacifico',cursive;font-size:2.8em;line-height:1.3;text-align:center;
-  padding:0 .4em;word-break:break-word;text-shadow:0 .02em .06em rgba(0,0,0,.12);}
+.bnr>*{position:relative;z-index:2;}
+/* decorațiuni (frunze, inimioare, sclipiri) */
+.bnr-deco{position:absolute;pointer-events:none;z-index:1!important;}
+.bnr-deco svg{display:block;width:100%;height:100%;}
+.deco-leaf-tl{top:-.8em;left:-.8em;width:7.5em;height:7.5em;transform:rotate(8deg);opacity:.4;}
+.deco-leaf-bl{bottom:3.2em;left:-1.4em;width:6em;height:6em;transform:scaleX(-1) rotate(-15deg);opacity:.3;}
+.deco-leaf-br{bottom:2.6em;right:-1.2em;width:5.5em;height:5.5em;transform:rotate(160deg);opacity:.25;}
+.deco-heart1{top:1.1em;right:7.6em;width:1.6em;height:1.6em;opacity:.85;transform:rotate(14deg);z-index:2!important;}
+.deco-heart2{top:2.6em;right:6.9em;width:1em;height:1em;opacity:.7;transform:rotate(-12deg);z-index:2!important;}
+.bnr:not(.hasqr) .deco-heart1{right:1.6em;}
+.bnr:not(.hasqr) .deco-heart2{right:1em;}
+.deco-spark1{top:4.6em;left:1.2em;width:1.1em;height:1.1em;opacity:.6;}
+.deco-spark2{bottom:5.6em;right:1.6em;width:1.4em;height:1.4em;opacity:.5;}
+/* strălucire albă în spatele pozelor cu produse */
+.bnr-imgs::before{content:'';position:absolute;inset:6% 0;z-index:0;
+  background:radial-gradient(ellipse at 50% 60%,rgba(255,255,255,.8) 0,rgba(255,255,255,.25) 45%,transparent 70%);}
+.bnr-imgs img{position:relative;z-index:1;}
+.bnr-imgs .bnr-price{z-index:2;}
+.bnr-title{font-family:'Pacifico',cursive;font-size:3.1em;line-height:1.3;text-align:center;
+  padding:0 .4em;word-break:break-word;text-shadow:0 .03em .08em rgba(0,0,0,.16);}
 .bnr-tag{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.05em;
   letter-spacing:.28em;text-transform:uppercase;text-align:center;margin-top:.5em;}
 /* când există QR, titlul și sloganul stau centrat în zona din stânga cardului QR */
@@ -255,6 +273,7 @@ textarea{resize:vertical;min-height:64px;}
 
 /* Teme banner (gradiente + accente) */
 .bt-pastel{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
   radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
   radial-gradient(circle at 88% 90%,rgba(240,170,255,.4) 0,transparent 45%),
   linear-gradient(135deg,#fce9f2 0%,#e5d6f8 55%,#f9d3e7 100%);color:#4a1d6e;}
@@ -263,6 +282,7 @@ textarea{resize:vertical;min-height:64px;}
 .bt-pastel .bnr-price{background:#e91e63;}
 
 .bt-sunset{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
   radial-gradient(circle at 15% 10%,rgba(255,255,255,.55) 0,transparent 40%),
   radial-gradient(circle at 85% 92%,rgba(255,120,50,.28) 0,transparent 45%),
   linear-gradient(135deg,#fff3d6 0%,#ffdba5 55%,#ffc98a 100%);color:#7a2e00;}
@@ -271,6 +291,7 @@ textarea{resize:vertical;min-height:64px;}
 .bt-sunset .bnr-price{background:#c62828;}
 
 .bt-fresh{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
   radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
   radial-gradient(circle at 88% 90%,rgba(120,220,140,.3) 0,transparent 45%),
   linear-gradient(135deg,#eafaf0 0%,#cdeed8 55%,#bfe8cf 100%);color:#0d4d1f;}
@@ -279,6 +300,7 @@ textarea{resize:vertical;min-height:64px;}
 .bt-fresh .bnr-price{background:#ef6c00;}
 
 .bt-ocean{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
   radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
   radial-gradient(circle at 88% 90%,rgba(90,170,255,.3) 0,transparent 45%),
   linear-gradient(135deg,#e8f3fd 0%,#cfe4fa 55%,#bcd9f7 100%);color:#0b3061;}
@@ -347,14 +369,15 @@ textarea{resize:vertical;min-height:64px;}
         <button class="ks" id="kindBanner">🪧 Banner reclamă<span class="kd">titlu, beneficii, poze, QR</span></button>
       </div>
       <div class="card">
-        <div class="card-h"><div class="dot"></div><h3>Generare rapidă din descriere</h3></div>
+        <div class="card-h"><div class="dot"></div><h3>✨ Generare cu AI / din descriere</h3></div>
         <div class="card-b">
-          <textarea id="quickText" rows="4" placeholder="Lipește aici descrierea produsului… &#10;Ex: Cașcaval Dalia 450g&#10;Preț vechi 24,99 lei — acum doar 18,99 lei!&#10;Produs românesc, maturat 60 de zile."></textarea>
+          <textarea id="quickText" rows="4" placeholder="Descrie afacerea sau produsul tău…&#10;Ex: Stand de bubble tea în parc, ceai cu perle de tapioca,&#10;arome de mango, căpșuni și afine, 15 lei paharul."></textarea>
           <div class="btn-row" style="margin-top:10px;">
-            <button class="btn primary" id="btnQuick">⚡ Generează eticheta</button>
+            <button class="btn primary" id="btnAiText">✨ Generează cu AI</button>
+            <button class="btn" id="btnQuick">⚡ Rapid (fără AI)</button>
             <button class="btn sm" id="btnQuickClear">Golește</button>
           </div>
-          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;">Extrage automat: numele (primul rând), prețul, prețul vechi și descrierea.</p>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;">✨ AI (gratuit, prin Pollinations.ai, fără cont): scrie titlul, sloganul, beneficiile și îndemnul pentru tine — durează 5–20 secunde. ⚡ Rapid: extrage doar numele, prețul și descrierea din text, fără internet.</p>
         </div>
       </div>
 
@@ -368,6 +391,10 @@ textarea{resize:vertical;min-height:64px;}
           <label class="fl" id="lblPhotos">Poză produs</label>
           <div class="photo-slots" id="photoSlots"></div>
           <input type="file" id="prodPhotoInput" accept="image/*" style="display:none;">
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn sm" id="btnAiImgs">✨ Generează poze cu AI (gratuit)</button>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;">AI creează poze de produs după numele și descrierea de mai sus — le poți înlocui oricând cu pozele tale reale.</p>
         </div>
       </div>
 
@@ -735,6 +762,21 @@ function drawQR(canvas,text){
    CONSTRUIRE BANNER RECLAMĂ (DOM)
    ========================================================= */
 const FEAT_GLYPHS=['✓','★','♥','☀'];
+
+/* SVG-uri decorative pentru banner */
+const LEAF_PETAL='M0 0 C7 -7 17 -8 23 -1 C16 4 6 4 0 0 Z';
+const svgLeaf=col=>{
+  // frunze așezate de-o parte și de alta a unei tulpini curbate
+  const leaves=[[19,98,-5],[19,98,-115],[31,79,0],[31,79,-110],
+                [46,60,6],[46,60,-104],[63,40,7],[63,40,-103],[80,22,-48]];
+  return '<svg viewBox="0 0 120 120"><g fill="'+col+'">'+
+    '<path d="M12 112 Q34 66 88 14" stroke="'+col+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+    leaves.map(([x,y,a])=>'<path d="'+LEAF_PETAL+'" transform="translate('+x+' '+y+') rotate('+a+')"/>').join('')+
+    '</g></svg>';
+};
+const svgHeart=col=>'<svg viewBox="0 0 100 100"><path d="M50 88 C22 64 12 42 26 28 C36 18 50 23 50 34 C50 23 64 18 74 28 C88 42 78 64 50 88 Z" fill="none" stroke="'+col+'" stroke-width="9" stroke-linejoin="round"/></svg>';
+const svgSpark=col=>'<svg viewBox="0 0 100 100"><path d="M50 2 L59 41 L98 50 L59 59 L50 98 L41 59 L2 50 L41 41 Z" fill="'+col+'"/></svg>';
+
 function buildBanner(d,forPrint){
   const el=document.createElement('div');
   el.className='bnr bt-'+(d.theme||'pastel')+(d.qrLink?' hasqr':'')+((d.cut&&forPrint!=='png')?' cut':'');
@@ -743,6 +785,15 @@ function buildBanner(d,forPrint){
   const base=Math.min(w,h)/30;
   el.style.fontSize=base.toFixed(2)+'mm';
   const theme=THEMES_BANNER.find(t=>t.id===d.theme)||THEMES_BANNER[0];
+
+  // decorațiuni: frunze în colțuri, inimioare lângă titlu, sclipiri
+  const leafCol=theme.icons[0],heartCol=theme.icons[1],sparkCol=theme.icons[3];
+  [['deco-leaf-tl',svgLeaf(leafCol)],['deco-leaf-bl',svgLeaf(leafCol)],['deco-leaf-br',svgLeaf(leafCol)],
+   ['deco-heart1',svgHeart(heartCol)],['deco-heart2',svgHeart(heartCol)],
+   ['deco-spark1',svgSpark(sparkCol)],['deco-spark2',svgSpark(sparkCol)]]
+   .forEach(([cls,svg])=>{
+     const dv=document.createElement('div');dv.className='bnr-deco '+cls;dv.innerHTML=svg;el.appendChild(dv);
+   });
 
   if(d.qrLink){
     const q=document.createElement('div');q.className='bnr-qr';
@@ -1144,6 +1195,82 @@ $('btnQuick').addEventListener('click',()=>{
   toast('✓ '+(curKind==='banner'?'Banner generat':'Etichetă generată')+' — verifică și ajustează câmpurile');
 });
 $('btnQuickClear').addEventListener('click',()=>{$('quickText').value='';});
+
+/* =========================================================
+   MOTOR AI GRATUIT — Pollinations.ai (fără cont / cheie)
+   ========================================================= */
+function btnBusy(btn,busy,busyTxt){
+  if(busy){btn.dataset.txt=btn.textContent;btn.textContent=busyTxt;btn.disabled=true;}
+  else{btn.textContent=btn.dataset.txt||btn.textContent;btn.disabled=false;}
+}
+
+/* generare texte: titlu, slogan, beneficii, îndemn */
+$('btnAiText').addEventListener('click',async()=>{
+  const descr=$('quickText').value.trim();
+  if(!descr){toast('Scrie mai întâi o descriere a afacerii / produsului');return;}
+  const btn=$('btnAiText');btnBusy(btn,true,'✨ AI lucrează…');
+  const isBanner=curKind==='banner';
+  const prompt='Ești un designer de reclame român. Pe baza acestei descrieri: "'+descr+'" '+
+    'creează conținut pentru '+(isBanner?'un banner publicitar stradal':'o etichetă de preț')+'. '+
+    'Răspunde DOAR cu un obiect JSON valid, fără alt text, cu exact aceste chei: '+
+    '{"title":"numele scurt și atrăgător al brandului sau produsului (max 3 cuvinte)",'+
+    '"slogan":"slogan de 3-4 cuvinte scurte despărțite prin punct, cu MAJUSCULE, ex: RĂCORIRE. BUBBLE. BUCURIE.",'+
+    '"benefits":["exact 4 beneficii foarte scurte (2-4 cuvinte), fiecare începând cu un emoji potrivit"],'+
+    '"cta":"un îndemn scurt și energic pentru client, max 5 cuvinte",'+
+    '"price":"prețul numeric dacă apare în descriere, altfel null"}';
+  try{
+    const r=await fetch('https://text.pollinations.ai/'+encodeURIComponent(prompt));
+    if(!r.ok)throw new Error('serviciul AI a răspuns cu eroare '+r.status);
+    const t=await r.text();
+    const m=t.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('răspuns AI neașteptat');
+    const j=JSON.parse(m[0]);
+    if(j.title)$('fName').value=String(j.title);
+    if(j.slogan)$('fDesc').value=String(j.slogan);
+    if(isBanner){
+      if(Array.isArray(j.benefits)&&j.benefits.length)$('fFeats').value=j.benefits.map(String).join('\n');
+      if(j.cta)$('fCta').value=String(j.cta);
+    }
+    if(j.price!=null&&j.price!==''&&!isNaN(parseFloat(j.price)))$('fPrice').value=parseFloat(j.price);
+    renderPreview();
+    toast('✨ Conținut generat de AI — ajustează ce vrei');
+  }catch(e){
+    toast('⚠ AI indisponibil ('+e.message+') — încearcă din nou sau folosește ⚡ Rapid');
+  }
+  btnBusy(btn,false);
+});
+
+/* generare poze de produs cu AI */
+$('btnAiImgs').addEventListener('click',async()=>{
+  const name=$('fName').value.trim();
+  if(!name){toast('Completează mai întâi numele produsului / titlul');return;}
+  const n=curKind==='banner'?3:1;
+  if(photos.filter(Boolean).length&&!confirm('Pozele existente vor fi înlocuite cu poze generate de AI. Continui?'))return;
+  const btn=$('btnAiImgs');
+  const subj=name+($('fDesc').value.trim()?', '+$('fDesc').value.trim():'');
+  try{
+    for(let i=0;i<n;i++){
+      btnBusy(btn,true,'✨ Generez poza '+(i+1)+'/'+n+'…');
+      const prompt='professional advertising product photography of '+subj+
+        ', appetizing vibrant colors, studio lighting, centered product, clean soft background, high quality, no text'+
+        (n>1?', variation '+(i+1):'');
+      const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+
+        '?width=640&height=896&nologo=true&seed='+Math.floor(Math.random()*1e6);
+      const r=await fetch(url);
+      if(!r.ok)throw new Error('serviciul AI a răspuns cu eroare '+r.status);
+      const blob=await r.blob();
+      await new Promise((res,rej)=>{
+        compressImage(blob,800,durl=>{photos[i]=durl;res();});
+        setTimeout(()=>rej(new Error('timeout la procesarea pozei')),30000);
+      });
+      renderPhotoSlots();renderPreview();
+    }
+    toast('✨ '+n+(n>1?' poze generate':' poză generată')+' — le poți schimba oricând');
+  }catch(e){
+    toast('⚠ Generarea AI a eșuat ('+e.message+') — verifică internetul și reîncearcă');
+  }
+  btnBusy(btn,false);
+});
 
 /* =========================================================
    SALVARE / LISTĂ ETICHETE
