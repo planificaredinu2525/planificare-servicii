@@ -211,9 +211,17 @@ textarea{resize:vertical;min-height:64px;}
    ========================================================= */
 .bnr{position:relative;display:flex;flex-direction:column;overflow:hidden;
   font-family:'Barlow',sans-serif;box-sizing:border-box;
-  padding:1.1em;line-height:1.15;flex-shrink:0;}
+  padding:1.2em;line-height:1.15;flex-shrink:0;}
 .bnr.cut{outline:1px dashed #999;outline-offset:-1px;}
 .bnr>*{position:relative;z-index:2;}
+/* vignetă subtilă + ramă interioară elegantă */
+.bnr::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%,transparent 62%,rgba(40,10,60,.10) 100%);}
+.bnr::after{content:'';position:absolute;inset:.5em;z-index:4;pointer-events:none;
+  border:.05em solid rgba(255,255,255,.55);border-radius:.55em;}
+.bt-noapte.bnr::after{border-color:rgba(255,255,255,.16);}
+/* bule plutitoare decorative */
+.bnr-bub{position:absolute;border-radius:50%;z-index:1;pointer-events:none;}
 /* decorațiuni (frunze, inimioare, sclipiri) */
 .bnr-deco{position:absolute;pointer-events:none;z-index:1!important;}
 .bnr-deco svg{display:block;width:100%;height:100%;}
@@ -232,14 +240,23 @@ textarea{resize:vertical;min-height:64px;}
 .bnr-imgs img{position:relative;z-index:1;}
 .bnr-imgs .bnr-price{z-index:2;}
 .bnr-title{font-family:'Pacifico',cursive;font-size:3.1em;line-height:1.3;text-align:center;
-  padding:0 .4em;word-break:break-word;text-shadow:0 .03em .08em rgba(0,0,0,.16);}
-.bnr-tag{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.05em;
-  letter-spacing:.28em;text-transform:uppercase;text-align:center;margin-top:.5em;}
+  padding:0 .4em;word-break:break-word;
+  text-shadow:0 .045em 0 rgba(255,255,255,.25),0 .09em .22em rgba(20,0,40,.28);}
+.bt-noapte .bnr-title{text-shadow:0 0 .35em rgba(255,255,255,.35),0 .09em .22em rgba(0,0,0,.5);}
+/* arc caligrafic sub titlu */
+.bnr-swash{width:9em;height:.9em;margin:.1em auto 0;opacity:.9;}
+.bnr-swash svg{display:block;width:100%;height:100%;}
+.bnr-tag{display:flex;align-items:center;justify-content:center;gap:.55em;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1em;
+  letter-spacing:.24em;text-transform:uppercase;text-align:center;margin-top:.5em;}
+.bnr-tag .tr{flex:0 0 1.3em;height:.09em;background:currentColor;opacity:.45;border-radius:.05em;}
 /* când există QR, titlul și sloganul stau centrat în zona din stânga cardului QR */
 .bnr.hasqr .bnr-title{padding:0 2.5em 0 .5em;}
-.bnr.hasqr .bnr-tag{padding:0 7em 0 1.4em;}
-.bnr-qr{position:absolute;top:.9em;right:.9em;background:#fff;border-radius:.45em;
-  padding:.45em .5em;text-align:center;box-shadow:0 .15em .5em rgba(0,0,0,.18);z-index:3;}
+.bnr.hasqr .bnr-swash{margin-right:8.4em;}
+.bnr.hasqr .bnr-tag{padding:0 5.8em 0 .8em;}
+.bnr-qr{position:absolute;top:.9em;right:.9em;background:#fff;border-radius:.7em;
+  padding:.5em .55em;text-align:center;z-index:3;
+  box-shadow:0 .25em .8em rgba(20,0,40,.22);border:.04em solid rgba(0,0,0,.05);}
 .bnr-qr .qt{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.55em;
   letter-spacing:.1em;color:#222;text-transform:uppercase;white-space:nowrap;}
 .bnr-qr canvas{width:4.2em;height:4.2em;display:block;margin:.25em auto;image-rendering:pixelated;}
@@ -247,28 +264,42 @@ textarea{resize:vertical;min-height:64px;}
 .bnr-feats{display:flex;flex-direction:column;gap:.8em;flex:0 0 auto;max-width:40%;
   max-height:100%;justify-content:center;}
 .bnr-feat{display:flex;align-items:center;gap:.55em;}
-.bnr-feat .fi{width:1.95em;height:1.95em;border-radius:50%;display:flex;align-items:center;
+.bnr-feat .fi{width:2em;height:2em;border-radius:50%;display:flex;align-items:center;
   justify-content:center;font-size:1em;color:#fff;flex-shrink:0;
-  box-shadow:0 .1em .3em rgba(0,0,0,.15);}
+  border:.09em solid rgba(255,255,255,.75);
+  box-shadow:0 .12em .35em rgba(20,0,40,.25),inset 0 .1em .2em rgba(255,255,255,.35);}
 .bnr-feat .ft{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95em;
   text-transform:uppercase;letter-spacing:.03em;line-height:1.12;overflow-wrap:break-word;min-width:0;}
 .bnr-imgs{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:.6em;
   min-height:0;height:100%;position:relative;}
 .bnr-imgs img{height:92%;object-fit:contain;
-  filter:drop-shadow(0 .25em .5em rgba(0,0,0,.28));border-radius:.3em;}
+  filter:drop-shadow(0 .3em .55em rgba(20,0,40,.32));border-radius:.3em;}
 .bnr-imgs.n1 img{max-width:78%;}
 .bnr-imgs.n2 img{max-width:46%;}
 .bnr-imgs.n3 img{max-width:31%;}
-.bnr-price{position:absolute;bottom:.2em;right:.2em;border-radius:50%;
-  width:5.4em;height:5.4em;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;color:#fff;transform:rotate(7deg);z-index:2;
-  box-shadow:0 .18em .5em rgba(0,0,0,.3);text-align:center;}
-.bnr-price .po{font-size:.75em;text-decoration:line-through;opacity:.85;line-height:1;}
-.bnr-price .pv{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.75em;line-height:1;}
-.bnr-price .pu{font-size:.68em;opacity:.95;line-height:1.2;}
-.bnr-cta{align-self:center;margin-top:1.1em;color:#fff;font-family:'Barlow Condensed',sans-serif;
-  font-weight:800;font-size:1.4em;letter-spacing:.1em;text-transform:uppercase;
-  padding:.42em 1.5em;border-radius:2em;box-shadow:0 .12em .4em rgba(0,0,0,.2);text-align:center;}
+/* umbră de contact sub produse */
+.bnr-imgs::after{content:'';position:absolute;left:12%;right:12%;bottom:1%;height:5%;z-index:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(20,0,40,.28) 0,transparent 70%);}
+/* stea de promoție pentru preț */
+.bnr-price{position:absolute;bottom:.1em;right:0;width:6.2em;height:6.2em;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;transform:rotate(8deg);z-index:2;text-align:center;}
+.bnr-price .star{position:absolute;inset:0;width:100%;height:100%;
+  filter:drop-shadow(0 .15em .4em rgba(20,0,40,.35));}
+.bnr-price .po,.bnr-price .pv,.bnr-price .pu{position:relative;z-index:1;}
+.bnr-price .po{font-size:.72em;text-decoration:line-through;opacity:.9;line-height:1;}
+.bnr-price .pv{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.8em;line-height:1;
+  text-shadow:0 .05em .12em rgba(0,0,0,.25);}
+.bnr-price .pu{font-size:.66em;opacity:.95;line-height:1.2;}
+/* buton lucios cu reflexie */
+.bnr-cta{position:relative;align-self:center;margin-top:1.1em;color:#fff;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4em;
+  letter-spacing:.1em;text-transform:uppercase;padding:.45em 1.6em;border-radius:2em;
+  text-align:center;overflow:hidden;border:.06em solid rgba(255,255,255,.55);
+  box-shadow:0 .18em .5em rgba(20,0,40,.3);text-shadow:0 .05em .1em rgba(0,0,0,.25);}
+.bnr-cta::before{content:'';position:absolute;left:.4em;right:.4em;top:.1em;height:45%;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));
+  border-radius:2em;pointer-events:none;}
 .bnr-footer{text-align:center;font-size:.72em;opacity:.75;margin-top:.7em;}
 
 /* Teme banner (gradiente + accente) */
@@ -278,8 +309,7 @@ textarea{resize:vertical;min-height:64px;}
   radial-gradient(circle at 88% 90%,rgba(240,170,255,.4) 0,transparent 45%),
   linear-gradient(135deg,#fce9f2 0%,#e5d6f8 55%,#f9d3e7 100%);color:#4a1d6e;}
 .bt-pastel .bnr-tag{color:#5b2a86;}
-.bt-pastel .bnr-cta{background:#7b3fa0;}
-.bt-pastel .bnr-price{background:#e91e63;}
+.bt-pastel .bnr-cta{background:linear-gradient(180deg,#a565d6,#6d2f9c);}
 
 .bt-sunset{background:
   radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
@@ -287,8 +317,7 @@ textarea{resize:vertical;min-height:64px;}
   radial-gradient(circle at 85% 92%,rgba(255,120,50,.28) 0,transparent 45%),
   linear-gradient(135deg,#fff3d6 0%,#ffdba5 55%,#ffc98a 100%);color:#7a2e00;}
 .bt-sunset .bnr-tag{color:#a34700;}
-.bt-sunset .bnr-cta{background:#e65100;}
-.bt-sunset .bnr-price{background:#c62828;}
+.bt-sunset .bnr-cta{background:linear-gradient(180deg,#ff9d4d,#e65100);}
 
 .bt-fresh{background:
   radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
@@ -296,8 +325,7 @@ textarea{resize:vertical;min-height:64px;}
   radial-gradient(circle at 88% 90%,rgba(120,220,140,.3) 0,transparent 45%),
   linear-gradient(135deg,#eafaf0 0%,#cdeed8 55%,#bfe8cf 100%);color:#0d4d1f;}
 .bt-fresh .bnr-tag{color:#1b5e20;}
-.bt-fresh .bnr-cta{background:#2e7d32;}
-.bt-fresh .bnr-price{background:#ef6c00;}
+.bt-fresh .bnr-cta{background:linear-gradient(180deg,#66bb6a,#2e7d32);}
 
 .bt-ocean{background:
   radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
@@ -305,16 +333,16 @@ textarea{resize:vertical;min-height:64px;}
   radial-gradient(circle at 88% 90%,rgba(90,170,255,.3) 0,transparent 45%),
   linear-gradient(135deg,#e8f3fd 0%,#cfe4fa 55%,#bcd9f7 100%);color:#0b3061;}
 .bt-ocean .bnr-tag{color:#0d47a1;}
-.bt-ocean .bnr-cta{background:#1565c0;}
-.bt-ocean .bnr-price{background:#e91e63;}
+.bt-ocean .bnr-cta{background:linear-gradient(180deg,#42a5f5,#1565c0);}
 
 .bt-noapte{background:
   radial-gradient(circle at 15% 10%,rgba(120,80,255,.3) 0,transparent 42%),
   radial-gradient(circle at 85% 90%,rgba(255,60,130,.25) 0,transparent 45%),
   linear-gradient(135deg,#191932 0%,#1f1440 55%,#2a1230 100%);color:#fff;}
 .bt-noapte .bnr-tag{color:#d9c7ff;}
-.bt-noapte .bnr-cta{background:#e94560;}
-.bt-noapte .bnr-price{background:#ffb300;color:#1a1a2e;}
+.bt-noapte .bnr-cta{background:linear-gradient(180deg,#ff5f7e,#d6244a);}
+.bt-noapte .bnr-price{color:#1a1a2e;}
+.bt-noapte .bnr-price .pv{text-shadow:none;}
 
 /* Comutator tip etichetă */
 .kind-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
@@ -654,16 +682,22 @@ const THEMES_PRICE=[
 ];
 const THEMES_BANNER=[
   {id:'pastel',name:'Pastel',sw:'linear-gradient(135deg,#fce9f2,#e5d6f8,#f9d3e7)',fg:'#7b3fa0',
-   icons:['#7b3fa0','#e91e63','#43a047','#fb8c00']},
+   icons:['#7b3fa0','#e91e63','#43a047','#fb8c00'],star:['#ff6fa5','#d81b60']},
   {id:'sunset',name:'Apus',sw:'linear-gradient(135deg,#fff3d6,#ffdba5,#ffc98a)',fg:'#e65100',
-   icons:['#e65100','#c62828','#f9a825','#6d4c41']},
+   icons:['#e65100','#c62828','#f9a825','#6d4c41'],star:['#ef5350','#b71c1c']},
   {id:'fresh',name:'Fresh',sw:'linear-gradient(135deg,#eafaf0,#cdeed8,#bfe8cf)',fg:'#2e7d32',
-   icons:['#2e7d32','#00897b','#7cb342','#ef6c00']},
+   icons:['#2e7d32','#00897b','#7cb342','#ef6c00'],star:['#ffa726','#ef6c00']},
   {id:'ocean',name:'Ocean',sw:'linear-gradient(135deg,#e8f3fd,#cfe4fa,#bcd9f7)',fg:'#1565c0',
-   icons:['#1565c0','#00838f','#5e35b1','#e91e63']},
+   icons:['#1565c0','#00838f','#5e35b1','#e91e63'],star:['#ff6fa5','#d81b60']},
   {id:'noapte',name:'Noapte',sw:'linear-gradient(135deg,#191932,#1f1440,#2a1230)',fg:'#e94560',
-   icons:['#e94560','#9c27b0','#00bcd4','#ffb300']},
+   icons:['#e94560','#9c27b0','#00bcd4','#ffb300'],star:['#ffca28','#ff8f00']},
 ];
+/* nuanță mai deschisă a unei culori hex (pentru gradiente) */
+function lighten(hex,f){
+  const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+  const L=v=>Math.round(v+(255-v)*f);
+  return 'rgb('+L(r)+','+L(g)+','+L(b)+')';
+}
 function sizesFor(kind){return kind==='banner'?SIZES_BANNER:SIZES_PRICE;}
 function themesFor(kind){return kind==='banner'?THEMES_BANNER:THEMES_PRICE;}
 let curKind='price', curSize='s3', curTheme='alb';
@@ -776,6 +810,21 @@ const svgLeaf=col=>{
 };
 const svgHeart=col=>'<svg viewBox="0 0 100 100"><path d="M50 88 C22 64 12 42 26 28 C36 18 50 23 50 34 C50 23 64 18 74 28 C88 42 78 64 50 88 Z" fill="none" stroke="'+col+'" stroke-width="9" stroke-linejoin="round"/></svg>';
 const svgSpark=col=>'<svg viewBox="0 0 100 100"><path d="M50 2 L59 41 L98 50 L59 59 L50 98 L41 59 L2 50 L41 41 Z" fill="'+col+'"/></svg>';
+const svgSwash=col=>'<svg viewBox="0 0 120 20"><path d="M6 15 Q60 -6 114 15" stroke="'+col+'" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="6" cy="15" r="2.6" fill="'+col+'"/><circle cx="114" cy="15" r="2.6" fill="'+col+'"/></svg>';
+function svgStar(id,c1,c2){
+  let pts='';
+  for(let i=0;i<32;i++){
+    const a=Math.PI*i/16-Math.PI/2,r=i%2?41:50;
+    pts+=(50+r*Math.cos(a)).toFixed(1)+','+(50+r*Math.sin(a)).toFixed(1)+' ';
+  }
+  return '<svg class="star" viewBox="0 0 100 100"><defs>'+
+    '<linearGradient id="sg'+id+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c2+'"/></linearGradient></defs>'+
+    '<polygon points="'+pts.trim()+'" fill="url(#sg'+id+')"/></svg>';
+}
+/* poziții fixe pentru bulele decorative: [stânga %, sus %, mărime em] */
+const BNR_BUBS=[[6,20,1.6],[91,28,1.0],[12,52,.8],[94,58,1.3],[19,84,.9],
+                [76,9,.7],[56,5,1.0],[88,84,.8],[42,93,.7],[3,36,.6]];
 
 function buildBanner(d,forPrint){
   const el=document.createElement('div');
@@ -794,6 +843,14 @@ function buildBanner(d,forPrint){
    .forEach(([cls,svg])=>{
      const dv=document.createElement('div');dv.className='bnr-deco '+cls;dv.innerHTML=svg;el.appendChild(dv);
    });
+  // bule plutitoare
+  BNR_BUBS.forEach(([x,y,sz],i)=>{
+    const b=document.createElement('div');b.className='bnr-bub';
+    const col=theme.icons[i%theme.icons.length];
+    b.style.cssText='left:'+x+'%;top:'+y+'%;width:'+sz+'em;height:'+sz+'em;opacity:.22;'+
+      'background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),'+col+' 70%);';
+    el.appendChild(b);
+  });
 
   if(d.qrLink){
     const q=document.createElement('div');q.className='bnr-qr';
@@ -804,8 +861,18 @@ function buildBanner(d,forPrint){
     el.appendChild(q);
   }
 
-  if(d.name){const t=document.createElement('div');t.className='bnr-title';t.textContent=d.name;el.appendChild(t);}
-  if(d.showDesc&&d.desc){const tg=document.createElement('div');tg.className='bnr-tag';tg.textContent=d.desc;el.appendChild(tg);}
+  if(d.name){
+    const t=document.createElement('div');t.className='bnr-title';t.textContent=d.name;el.appendChild(t);
+    const sw=document.createElement('div');sw.className='bnr-swash';sw.innerHTML=svgSwash(theme.fg);el.appendChild(sw);
+  }
+  if(d.showDesc&&d.desc){
+    const tg=document.createElement('div');tg.className='bnr-tag';
+    const r1=document.createElement('span');r1.className='tr';
+    const tx=document.createElement('span');tx.textContent=d.desc;
+    const r2=document.createElement('span');r2.className='tr';
+    tg.appendChild(r1);tg.appendChild(tx);tg.appendChild(r2);
+    el.appendChild(tg);
+  }
 
   const feats=(d.feats||'').split('\n').map(l=>l.trim()).filter(Boolean);
   const photos=(d.photos||[]).filter(Boolean);
@@ -817,7 +884,8 @@ function buildBanner(d,forPrint){
       feats.forEach((line,i)=>{
         const f=document.createElement('div');f.className='bnr-feat';
         const ic=document.createElement('div');ic.className='fi';
-        ic.style.background=theme.icons[i%theme.icons.length];
+        const icol=theme.icons[i%theme.icons.length];
+        ic.style.background='linear-gradient(135deg,'+lighten(icol,.35)+','+icol+')';
         // dacă rândul începe cu emoji, îl folosim ca iconiță
         const m=line.match(/^(\p{Extended_Pictographic}(?:️)?)\s*/u);
         let txt=line;
@@ -833,10 +901,11 @@ function buildBanner(d,forPrint){
     if(showImgs)photos.slice(0,3).forEach(src=>{
       const im=document.createElement('img');im.src=src;im.alt='';iw.appendChild(im);
     });
-    // bulina de preț
+    // steaua de preț
     const curP=fmtPrice(d.price);
     if(curP){
       const pb=document.createElement('div');pb.className='bnr-price';
+      pb.innerHTML=svgStar(d.id||uid(),theme.star[0],theme.star[1]);
       const oldP=fmtPrice(d.oldPrice);
       if(oldP&&oldP.full>curP.full){
         const po=document.createElement('div');po.className='po';
