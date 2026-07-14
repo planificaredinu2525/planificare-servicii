@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Etichete Comerciale — Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&family=Share+Tech+Mono&family=Pacifico&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+:root{
+  --bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
+  --border:#2a2a2a;--border2:#333;
+  --orange:#f57c00;--orange2:#ff9800;--od:rgba(245,124,0,.12);
+  --green:#00e676;--gd:rgba(0,230,118,.12);
+  --red:#f44336;--rd:rgba(244,67,54,.12);
+  --blue:#2196f3;--bd:rgba(33,150,243,.12);
+  --text:#e0e0e0;--text2:#aaa;--text3:#666;
+  --mono:'Share Tech Mono',monospace;
+  --body:'Barlow',sans-serif;
+  --cond:'Barlow Condensed',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:var(--bg);color:var(--text);font-family:var(--body);min-height:100vh;}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(245,124,0,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(245,124,0,.03) 1px,transparent 1px);
+  background-size:32px 32px;}
+
+/* ===== HEADER ===== */
+header{position:sticky;top:0;z-index:50;background:rgba(10,10,10,.95);backdrop-filter:blur(8px);border-bottom:1px solid var(--border);}
+.hd-in{max-width:1280px;margin:0 auto;padding:0 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:10px;padding:12px 0;}
+.brand-icon{width:32px;height:32px;border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;font-family:var(--cond);font-weight:800;color:var(--orange);font-size:15px;}
+.brand h1{font-family:var(--cond);font-size:19px;font-weight:800;letter-spacing:2px;white-space:nowrap;}
+.brand h1 span{color:var(--orange);}
+nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto;}
+.tab{background:none;border:none;color:var(--text2);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1.5px;padding:16px 14px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;text-transform:uppercase;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--orange);border-bottom-color:var(--orange);}
+.tab .cnt{display:inline-block;min-width:18px;text-align:center;background:var(--bg4);border:1px solid var(--border2);border-radius:9px;font-family:var(--mono);font-size:10px;padding:1px 5px;margin-left:5px;color:var(--text2);}
+.tab.active .cnt{background:var(--od);border-color:var(--orange);color:var(--orange);}
+
+/* ===== LAYOUT ===== */
+main{max-width:1280px;margin:0 auto;padding:20px 16px 80px;position:relative;z-index:1;}
+.page{display:none;}
+.page.active{display:block;}
+.cols{display:grid;grid-template-columns:minmax(320px,460px) 1fr;gap:20px;align-items:start;}
+@media(max-width:900px){.cols{grid-template-columns:1fr;}}
+
+.card{background:var(--bg2);border:1px solid var(--border);margin-bottom:14px;}
+.card-h{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.card-h h3{font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2);}
+.card-h .dot{width:8px;height:8px;background:var(--orange);}
+.card-b{padding:14px;}
+
+label.fl{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin:10px 0 4px;}
+label.fl:first-child{margin-top:0;}
+input[type=text],input[type=number],input[type=date],textarea,select{
+  width:100%;background:var(--bg3);border:1px solid var(--border2);color:var(--text);
+  font-family:var(--body);font-size:14px;padding:9px 10px;outline:none;border-radius:0;}
+input:focus,textarea:focus,select:focus{border-color:var(--orange);}
+textarea{resize:vertical;min-height:64px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);padding:5px 0;cursor:pointer;user-select:none;}
+.chk input{accent-color:var(--orange);width:15px;height:15px;cursor:pointer;}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);font-family:var(--cond);font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  padding:10px 16px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--orange);color:var(--orange);}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#000;}
+.btn.primary:hover{background:var(--orange2);color:#000;}
+.btn.green{background:var(--gd);border-color:var(--green);color:var(--green);}
+.btn.red{background:var(--rd);border-color:var(--red);color:var(--red);}
+.btn.sm{padding:6px 10px;font-size:12px;}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;}
+
+.size-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.size-opt{border:1px solid var(--border2);background:var(--bg3);padding:8px 6px;text-align:center;cursor:pointer;transition:.15s;}
+.size-opt:hover{border-color:var(--text3);}
+.size-opt.sel{border-color:var(--orange);background:var(--od);}
+.size-opt .sn{font-family:var(--cond);font-weight:700;font-size:13px;letter-spacing:1px;display:block;}
+.size-opt .sd{font-family:var(--mono);font-size:9px;color:var(--text3);display:block;margin-top:2px;}
+
+.theme-grid{display:flex;gap:8px;flex-wrap:wrap;}
+.theme-opt{width:52px;height:36px;border:2px solid var(--border2);cursor:pointer;position:relative;overflow:hidden;}
+.theme-opt.sel{border-color:var(--orange);box-shadow:0 0 0 2px var(--od);}
+.theme-opt span{position:absolute;inset:auto 0 0 0;font-size:8px;font-family:var(--mono);text-align:center;padding:1px 0;}
+
+.photo-drop{border:1px dashed var(--border2);background:var(--bg3);padding:14px;text-align:center;cursor:pointer;transition:.15s;position:relative;}
+.photo-drop:hover{border-color:var(--orange);}
+.photo-drop img{max-width:100%;max-height:120px;display:block;margin:0 auto 8px;}
+.photo-drop .ph-txt{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.photo-x{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border:none;width:22px;height:22px;cursor:pointer;font-size:12px;line-height:1;}
+
+/* ===== PREVIEW ===== */
+.preview-wrap{position:sticky;top:70px;}
+@media(max-width:900px){.preview-wrap{position:static;}}
+.preview-stage{background:#3a3a3a;background-image:linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%),linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%);background-size:20px 20px;background-position:0 0,10px 10px;
+  padding:24px;display:flex;justify-content:center;align-items:flex-start;overflow:auto;min-height:280px;border:1px solid var(--border);}
+.scale-box{transform-origin:top left;}
+.preview-info{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;padding:8px;letter-spacing:1px;}
+
+/* ===== LISTA ETICHETE ===== */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;}
+.toolbar input[type=text]{max-width:280px;}
+.lbl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.lbl-card{background:var(--bg2);border:1px solid var(--border);display:flex;flex-direction:column;}
+.lbl-card.sel-card{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange);}
+.lbl-card-prev{background:#3a3a3a;background-image:linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%),linear-gradient(45deg,#333 25%,transparent 25%,transparent 75%,#333 75%);background-size:16px 16px;background-position:0 0,8px 8px;
+  padding:12px;display:flex;justify-content:center;overflow:hidden;min-height:140px;align-items:center;cursor:pointer;}
+.lbl-card-b{padding:10px 12px;border-top:1px solid var(--border);}
+.lbl-card-b .nm{font-family:var(--cond);font-weight:700;font-size:15px;letter-spacing:.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lbl-card-b .mt{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:2px;}
+.lbl-card-acts{display:flex;gap:6px;padding:8px 12px 12px;flex-wrap:wrap;}
+.icon-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text2);font-size:12px;padding:5px 9px;cursor:pointer;font-family:var(--cond);letter-spacing:1px;font-weight:600;text-transform:uppercase;}
+.icon-btn:hover{border-color:var(--orange);color:var(--orange);}
+.icon-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.empty{text-align:center;padding:48px 20px;color:var(--text3);font-family:var(--mono);font-size:12px;letter-spacing:1px;border:1px dashed var(--border2);}
+
+/* ===== LOCATII ===== */
+.loc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.loc-card{background:var(--bg2);border:1px solid var(--border);}
+.loc-card img{width:100%;height:180px;object-fit:cover;display:block;cursor:pointer;}
+.loc-card-b{padding:10px 12px;}
+.loc-card-b .nt{font-size:13px;color:var(--text);min-height:18px;}
+.loc-card-b .lk{font-family:var(--mono);font-size:10px;color:var(--orange);margin-top:4px;}
+.loc-card-b .dt{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px;}
+.loc-card-acts{display:flex;gap:6px;padding:0 12px 12px;flex-wrap:wrap;}
+
+/* ===== MODAL ===== */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:none;align-items:center;justify-content:center;padding:16px;}
+.modal-ov.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);max-width:480px;width:100%;max-height:90vh;overflow:auto;}
+.modal .card-b{padding:16px;}
+.modal img.big{max-width:100%;display:block;}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--orange);color:var(--text);
+  font-family:var(--mono);font-size:12px;padding:10px 18px;z-index:200;display:none;letter-spacing:1px;}
+
+/* =========================================================
+   ETICHETA — stiluri (folosite pe ecran + print + PNG)
+   Dimensiuni în mm, tipografie în em (scalează cu font-size)
+   ========================================================= */
+.lbl{position:relative;display:flex;flex-direction:column;overflow:hidden;
+  font-family:'Barlow',sans-serif;background:#fff;color:#111;
+  padding:.7em;line-height:1.15;box-sizing:border-box;flex-shrink:0;}
+.lbl.cut{outline:1px dashed #999;outline-offset:-1px;}
+.lbl-badge{position:absolute;top:0;right:0;padding:.28em .7em;font-family:'Barlow Condensed',sans-serif;
+  font-weight:800;font-size:.95em;letter-spacing:.08em;text-transform:uppercase;z-index:2;}
+.lbl-name{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.55em;
+  letter-spacing:.02em;text-transform:uppercase;padding-right:3.2em;word-break:break-word;}
+.lbl-desc{font-size:.82em;opacity:.85;margin-top:.25em;word-break:break-word;}
+.lbl-img-wrap{flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:0;margin:.4em 0;}
+.lbl-img-wrap img{max-width:100%;max-height:100%;object-fit:contain;}
+.lbl-spacer{flex:1 1 auto;}
+.lbl-price-zone{margin-top:auto;}
+.lbl-old-row{display:flex;align-items:center;gap:.5em;}
+.lbl-old{font-size:1.05em;text-decoration:line-through;opacity:.7;font-weight:600;}
+.lbl-disc{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1em;padding:.05em .4em;}
+.lbl-price-row{display:flex;align-items:flex-end;gap:.25em;flex-wrap:wrap;}
+.lbl-price{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:3.4em;line-height:.9;}
+.lbl-price sup{font-size:.45em;vertical-align:super;font-weight:800;}
+.lbl-curr{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.3em;padding-bottom:.15em;}
+.lbl-unit{font-size:.9em;opacity:.8;padding-bottom:.25em;}
+.lbl-perunit{font-size:.75em;opacity:.75;margin-top:.15em;}
+.lbl-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:.6em;margin-top:.45em;}
+.lbl-foot-txt{font-size:.68em;opacity:.75;line-height:1.25;}
+.lbl-barcode{flex-shrink:0;text-align:center;background:#fff;padding:.15em .25em;}
+.lbl-barcode canvas{display:block;}
+.lbl-barcode .bc-txt{font-family:'Share Tech Mono',monospace;font-size:.6em;letter-spacing:.15em;color:#111;}
+
+/* Teme etichete */
+.lt-alb{background:#fff;color:#111;}
+.lt-alb .lbl-price,.lt-alb .lbl-curr{color:#c62828;}
+.lt-alb .lbl-badge{background:#c62828;color:#fff;}
+.lt-alb .lbl-disc{background:#c62828;color:#fff;}
+
+.lt-galben{background:#ffe733;color:#111;}
+.lt-galben .lbl-price,.lt-galben .lbl-curr{color:#c62828;}
+.lt-galben .lbl-badge{background:#c62828;color:#fff;}
+.lt-galben .lbl-disc{background:#c62828;color:#fff;}
+
+.lt-rosu{background:#c62828;color:#fff;}
+.lt-rosu .lbl-price,.lt-rosu .lbl-curr{color:#ffe733;}
+.lt-rosu .lbl-badge{background:#ffe733;color:#c62828;}
+.lt-rosu .lbl-disc{background:#ffe733;color:#c62828;}
+.lt-rosu .lbl-desc,.lt-rosu .lbl-old{opacity:.92;}
+
+.lt-negru{background:#141414;color:#f5f0e6;}
+.lt-negru .lbl-price,.lt-negru .lbl-curr{color:#d4af37;}
+.lt-negru .lbl-badge{background:#d4af37;color:#141414;}
+.lt-negru .lbl-disc{background:#d4af37;color:#141414;}
+
+.lt-verde{background:#f4fbf4;color:#1b3a1b;}
+.lt-verde .lbl-price,.lt-verde .lbl-curr{color:#2e7d32;}
+.lt-verde .lbl-badge{background:#2e7d32;color:#fff;}
+.lt-verde .lbl-disc{background:#2e7d32;color:#fff;}
+
+.lt-albastru{background:#fff;color:#0d2b4e;}
+.lt-albastru .lbl-price,.lt-albastru .lbl-curr{color:#1565c0;}
+.lt-albastru .lbl-badge{background:#1565c0;color:#fff;}
+.lt-albastru .lbl-disc{background:#1565c0;color:#fff;}
+
+/* =========================================================
+   BANNER RECLAMĂ — stil ca un banner stradal
+   ========================================================= */
+.bnr{position:relative;display:flex;flex-direction:column;overflow:hidden;
+  font-family:'Barlow',sans-serif;box-sizing:border-box;
+  padding:1.2em;line-height:1.15;flex-shrink:0;}
+.bnr.cut{outline:1px dashed #999;outline-offset:-1px;}
+.bnr>*{position:relative;z-index:2;}
+/* vignetă subtilă + ramă interioară elegantă */
+.bnr::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%,transparent 62%,rgba(40,10,60,.10) 100%);}
+.bnr::after{content:'';position:absolute;inset:.5em;z-index:4;pointer-events:none;
+  border:.05em solid rgba(255,255,255,.55);border-radius:.55em;}
+.bt-noapte.bnr::after{border-color:rgba(255,255,255,.16);}
+/* bule plutitoare decorative */
+.bnr-bub{position:absolute;border-radius:50%;z-index:1;pointer-events:none;}
+/* decorațiuni (frunze, inimioare, sclipiri) */
+.bnr-deco{position:absolute;pointer-events:none;z-index:1!important;}
+.bnr-deco svg{display:block;width:100%;height:100%;}
+.deco-leaf-tl{top:-.8em;left:-.8em;width:7.5em;height:7.5em;transform:rotate(8deg);opacity:.4;}
+.deco-leaf-bl{bottom:3.2em;left:-1.4em;width:6em;height:6em;transform:scaleX(-1) rotate(-15deg);opacity:.3;}
+.deco-leaf-br{bottom:2.6em;right:-1.2em;width:5.5em;height:5.5em;transform:rotate(160deg);opacity:.25;}
+.deco-heart1{top:1.1em;right:7.6em;width:1.6em;height:1.6em;opacity:.85;transform:rotate(14deg);z-index:2!important;}
+.deco-heart2{top:2.6em;right:6.9em;width:1em;height:1em;opacity:.7;transform:rotate(-12deg);z-index:2!important;}
+.bnr:not(.hasqr) .deco-heart1{right:1.6em;}
+.bnr:not(.hasqr) .deco-heart2{right:1em;}
+.deco-spark1{top:4.6em;left:1.2em;width:1.1em;height:1.1em;opacity:.6;}
+.deco-spark2{bottom:5.6em;right:1.6em;width:1.4em;height:1.4em;opacity:.5;}
+/* strălucire albă în spatele pozelor cu produse */
+.bnr-imgs::before{content:'';position:absolute;inset:6% 0;z-index:0;
+  background:radial-gradient(ellipse at 50% 60%,rgba(255,255,255,.8) 0,rgba(255,255,255,.25) 45%,transparent 70%);}
+.bnr-imgs img{position:relative;z-index:1;}
+.bnr-imgs .bnr-price{z-index:2;}
+.bnr-title{font-family:'Pacifico',cursive;font-size:3.1em;line-height:1.3;text-align:center;
+  padding:0 .4em;word-break:break-word;
+  text-shadow:0 .045em 0 rgba(255,255,255,.25),0 .09em .22em rgba(20,0,40,.28);}
+.bt-noapte .bnr-title{text-shadow:0 0 .35em rgba(255,255,255,.35),0 .09em .22em rgba(0,0,0,.5);}
+/* arc caligrafic sub titlu */
+.bnr-swash{width:9em;height:.9em;margin:.1em auto 0;opacity:.9;}
+.bnr-swash svg{display:block;width:100%;height:100%;}
+.bnr-tag{display:flex;align-items:center;justify-content:center;gap:.55em;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1em;
+  letter-spacing:.24em;text-transform:uppercase;text-align:center;margin-top:.5em;}
+.bnr-tag .tr{flex:0 0 1.3em;height:.09em;background:currentColor;opacity:.45;border-radius:.05em;}
+/* când există QR, titlul și sloganul stau centrat în zona din stânga cardului QR */
+.bnr.hasqr .bnr-title{padding:0 2.5em 0 .5em;}
+.bnr.hasqr .bnr-swash{margin-right:8.4em;}
+.bnr.hasqr .bnr-tag{padding:0 5.8em 0 .8em;}
+.bnr-qr{position:absolute;top:.9em;right:.9em;background:#fff;border-radius:.7em;
+  padding:.5em .55em;text-align:center;z-index:3;
+  box-shadow:0 .25em .8em rgba(20,0,40,.22);border:.04em solid rgba(0,0,0,.05);}
+.bnr-qr .qt{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:.55em;
+  letter-spacing:.1em;color:#222;text-transform:uppercase;white-space:nowrap;}
+.bnr-qr canvas{width:4.2em;height:4.2em;display:block;margin:.25em auto;image-rendering:pixelated;}
+.bnr-mid{display:flex;gap:1em;align-items:center;flex:1 1 auto;min-height:0;margin-top:1em;overflow:hidden;}
+.bnr-feats{display:flex;flex-direction:column;gap:.8em;flex:0 0 auto;max-width:40%;
+  max-height:100%;justify-content:center;}
+.bnr-feat{display:flex;align-items:center;gap:.55em;}
+.bnr-feat .fi{width:2em;height:2em;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:1em;color:#fff;flex-shrink:0;
+  border:.09em solid rgba(255,255,255,.75);
+  box-shadow:0 .12em .35em rgba(20,0,40,.25),inset 0 .1em .2em rgba(255,255,255,.35);}
+.bnr-feat .ft{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.95em;
+  text-transform:uppercase;letter-spacing:.03em;line-height:1.12;overflow-wrap:break-word;min-width:0;}
+.bnr-imgs{flex:1 1 auto;display:flex;align-items:center;justify-content:center;gap:.6em;
+  min-height:0;height:100%;position:relative;}
+.bnr-imgs img{height:92%;object-fit:cover;
+  filter:drop-shadow(0 .3em .55em rgba(20,0,40,.32));}
+/* fotografii dreptunghiulare: ramă albă rotunjită, ca un card foto */
+.bnr-imgs img.framed{border-radius:.9em;border:.14em solid rgba(255,255,255,.92);
+  box-shadow:0 .3em .7em rgba(20,0,40,.3);filter:none;aspect-ratio:3/4;}
+/* PNG-uri decupate (fundal transparent): plutesc libere, doar cu umbră */
+.bnr-imgs img.cutout{object-fit:contain;}
+.bnr-imgs.n1 img{max-width:78%;}
+.bnr-imgs.n2 img{max-width:46%;}
+.bnr-imgs.n3 img{max-width:31%;}
+
+/* ——— format LAT (ex. 2×1 m): două coloane ——— */
+.bnr.wide .bnr-wrow{display:flex;flex:1 1 auto;gap:1.2em;min-height:0;align-items:stretch;}
+.bnr.wide.hasqr .bnr-wrow{padding-right:5.4em;}
+.bnr.wide .bnr-wleft{flex:1 1 52%;display:flex;flex-direction:column;justify-content:center;min-width:0;}
+.bnr.wide .bnr-wrow .bnr-imgs{flex:1 1 48%;height:auto;}
+.bnr.wide .bnr-title{font-size:2.7em;padding:0 .3em;}
+.bnr.wide.hasqr .bnr-title{padding:0 .3em;}
+.bnr.wide .bnr-swash{margin:.1em auto 0;}
+.bnr.wide.hasqr .bnr-swash{margin-right:auto;}
+.bnr.wide.hasqr .bnr-tag{padding:0 .5em;}
+.bnr.wide .bnr-feats{max-width:100%;margin:.9em auto 0;flex:0 0 auto;}
+.bnr.wide .bnr-cta{margin-top:1em;}
+.bnr.wide .bnr-imgs img{height:86%;}
+
+/* ——— format ÎNALT (roll-up): poze mari la mijloc, beneficii dedesubt ——— */
+.bnr.tall .bnr-title{font-size:2.9em;}
+.bnr.tall .bnr-imgs{flex:1.3 1 0;height:auto;min-height:0;margin-top:.8em;
+  align-items:center;flex-wrap:wrap;align-content:center;}
+.bnr.tall .bnr-imgs img{height:88%;}
+/* la roll-up, fotografiile se așază după lățime ca să nu fie decupate (2 sus + 1 jos) */
+.bnr.tall .bnr-imgs img.framed{height:auto;max-height:94%;}
+.bnr.tall .bnr-imgs.n3 img.framed{width:40%;max-width:40%;max-height:47%;}
+.bnr.tall .bnr-imgs.n2 img.framed{width:44%;}
+.bnr.tall .bnr-imgs.n1 img.framed{width:68%;}
+.bnr.tall .bnr-feats{flex:0 0 auto;max-width:86%;margin:1em auto 0;}
+.bnr.tall .bnr-feat .ft{font-size:1.05em;}
+.bnr.tall .bnr-cta{margin-top:1.1em;}
+/* umbră de contact sub produse */
+.bnr-imgs::after{content:'';position:absolute;left:12%;right:12%;bottom:1%;height:5%;z-index:0;
+  background:radial-gradient(ellipse at 50% 50%,rgba(20,0,40,.28) 0,transparent 70%);}
+/* stea de promoție pentru preț */
+.bnr-price{position:absolute;bottom:.1em;right:0;width:6.2em;height:6.2em;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#fff;transform:rotate(8deg);z-index:2;text-align:center;}
+.bnr-price .star{position:absolute;inset:0;width:100%;height:100%;
+  filter:drop-shadow(0 .15em .4em rgba(20,0,40,.35));}
+.bnr-price .po,.bnr-price .pv,.bnr-price .pu{position:relative;z-index:1;}
+.bnr-price .po{font-size:.72em;text-decoration:line-through;opacity:.9;line-height:1;}
+.bnr-price .pv{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.8em;line-height:1;
+  text-shadow:0 .05em .12em rgba(0,0,0,.25);}
+.bnr-price .pu{font-size:.66em;opacity:.95;line-height:1.2;}
+/* buton lucios cu reflexie */
+.bnr-cta{position:relative;align-self:center;margin-top:1.1em;color:#fff;
+  font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:1.4em;
+  letter-spacing:.1em;text-transform:uppercase;padding:.45em 1.6em;border-radius:2em;
+  text-align:center;overflow:hidden;border:.06em solid rgba(255,255,255,.55);
+  box-shadow:0 .18em .5em rgba(20,0,40,.3);text-shadow:0 .05em .1em rgba(0,0,0,.25);}
+.bnr-cta::before{content:'';position:absolute;left:.4em;right:.4em;top:.1em;height:45%;
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,0));
+  border-radius:2em;pointer-events:none;}
+.bnr-footer{text-align:center;font-size:.72em;opacity:.75;margin-top:.7em;}
+
+/* Teme banner (gradiente + accente) */
+.bt-pastel{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
+  radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
+  radial-gradient(circle at 88% 90%,rgba(240,170,255,.4) 0,transparent 45%),
+  linear-gradient(135deg,#fce9f2 0%,#e5d6f8 55%,#f9d3e7 100%);color:#4a1d6e;}
+.bt-pastel .bnr-tag{color:#5b2a86;}
+.bt-pastel .bnr-cta{background:linear-gradient(180deg,#a565d6,#6d2f9c);}
+
+.bt-sunset{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
+  radial-gradient(circle at 15% 10%,rgba(255,255,255,.55) 0,transparent 40%),
+  radial-gradient(circle at 85% 92%,rgba(255,120,50,.28) 0,transparent 45%),
+  linear-gradient(135deg,#fff3d6 0%,#ffdba5 55%,#ffc98a 100%);color:#7a2e00;}
+.bt-sunset .bnr-tag{color:#a34700;}
+.bt-sunset .bnr-cta{background:linear-gradient(180deg,#ff9d4d,#e65100);}
+
+.bt-fresh{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
+  radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
+  radial-gradient(circle at 88% 90%,rgba(120,220,140,.3) 0,transparent 45%),
+  linear-gradient(135deg,#eafaf0 0%,#cdeed8 55%,#bfe8cf 100%);color:#0d4d1f;}
+.bt-fresh .bnr-tag{color:#1b5e20;}
+.bt-fresh .bnr-cta{background:linear-gradient(180deg,#66bb6a,#2e7d32);}
+
+.bt-ocean{background:
+  radial-gradient(ellipse at 50% 42%,rgba(255,255,255,.5) 0,transparent 55%),
+  radial-gradient(circle at 12% 8%,rgba(255,255,255,.6) 0,transparent 38%),
+  radial-gradient(circle at 88% 90%,rgba(90,170,255,.3) 0,transparent 45%),
+  linear-gradient(135deg,#e8f3fd 0%,#cfe4fa 55%,#bcd9f7 100%);color:#0b3061;}
+.bt-ocean .bnr-tag{color:#0d47a1;}
+.bt-ocean .bnr-cta{background:linear-gradient(180deg,#42a5f5,#1565c0);}
+
+.bt-noapte{background:
+  radial-gradient(circle at 15% 10%,rgba(120,80,255,.3) 0,transparent 42%),
+  radial-gradient(circle at 85% 90%,rgba(255,60,130,.25) 0,transparent 45%),
+  linear-gradient(135deg,#191932 0%,#1f1440 55%,#2a1230 100%);color:#fff;}
+.bt-noapte .bnr-tag{color:#d9c7ff;}
+.bt-noapte .bnr-cta{background:linear-gradient(180deg,#ff5f7e,#d6244a);}
+.bt-noapte .bnr-price{color:#1a1a2e;}
+.bt-noapte .bnr-price .pv{text-shadow:none;}
+
+/* Comutator tip etichetă */
+.kind-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+.ks{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);
+  font-family:var(--cond);font-size:15px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;padding:12px 8px;cursor:pointer;transition:.15s;}
+.ks:hover{border-color:var(--text3);}
+.ks.sel{border-color:var(--orange);background:var(--od);color:var(--orange);}
+.ks .kd{display:block;font-family:var(--mono);font-size:9px;letter-spacing:1px;
+  color:var(--text3);text-transform:none;margin-top:3px;}
+
+.photo-slots{display:grid;grid-template-columns:1fr;gap:8px;}
+.photo-slots.multi{grid-template-columns:repeat(3,1fr);}
+.photo-slots.multi .photo-drop img{max-height:70px;}
+
+/* ===== PRINT ===== */
+#printArea{display:none;}
+@media print{
+  body{background:#fff;}
+  .grid-bg,header,main,#toast,.modal-ov{display:none!important;}
+  #printArea{display:block!important;}
+  .print-sheet{display:flex;flex-wrap:wrap;align-content:flex-start;gap:3mm;}
+  .print-sheet .lbl{break-inside:avoid;page-break-inside:avoid;}
+  @page{margin:8mm;}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<header>
+  <div class="hd-in">
+    <div class="brand">
+      <div class="brand-icon">ET</div>
+      <h1>ETICHETE <span>COMERCIALE</span></h1>
+    </div>
+    <nav>
+      <button class="tab active" data-page="editor">Editor</button>
+      <button class="tab" data-page="labels">Etichetele mele <span class="cnt" id="cntLabels">0</span></button>
+      <button class="tab" data-page="locations">Locații amplasare <span class="cnt" id="cntLocs">0</span></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ================= EDITOR ================= -->
+<section class="page active" id="page-editor">
+  <div class="cols">
+    <div>
+      <div class="kind-switch">
+        <button class="ks sel" id="kindPrice">🏷 Etichetă preț<span class="kd">raft, vitrină, promoții</span></button>
+        <button class="ks" id="kindBanner">🪧 Banner reclamă<span class="kd">titlu, beneficii, poze, QR</span></button>
+      </div>
+      <div class="card">
+        <div class="card-h"><div class="dot"></div><h3>✨ Generare cu AI / din descriere</h3></div>
+        <div class="card-b">
+          <textarea id="quickText" rows="4" placeholder="Descrie afacerea sau produsul tău…&#10;Ex: Stand de bubble tea în parc, ceai cu perle de tapioca,&#10;arome de mango, căpșuni și afine, 15 lei paharul."></textarea>
+          <div class="btn-row" style="margin-top:10px;">
+            <button class="btn primary" id="btnAiText">✨ Generează cu AI</button>
+            <button class="btn" id="btnQuick">⚡ Rapid (fără AI)</button>
+            <button class="btn sm" id="btnQuickClear">Golește</button>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;">✨ AI (gratuit, prin Pollinations.ai, fără cont): scrie titlul, sloganul, beneficiile și îndemnul pentru tine — durează 5–20 secunde. ⚡ Rapid: extrage doar numele, prețul și descrierea din text, fără internet.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="dot"></div><h3>Produs</h3></div>
+        <div class="card-b">
+          <label class="fl" id="lblName">Nume produs</label>
+          <input type="text" id="fName" placeholder="Ex: Cașcaval Dalia 450g">
+          <label class="fl" id="lblDesc">Descriere (opțional)</label>
+          <textarea id="fDesc" rows="2" placeholder="Ex: Produs românesc, maturat 60 de zile"></textarea>
+          <label class="fl" id="lblPhotos">Poză produs</label>
+          <div class="photo-slots" id="photoSlots"></div>
+          <input type="file" id="prodPhotoInput" accept="image/*" style="display:none;">
+          <div class="btn-row" style="margin-top:8px;">
+            <button class="btn sm" id="btnAiImgs">✨ Generează poze cu AI (gratuit)</button>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px;">AI creează poze de produs după numele și descrierea de mai sus — le poți înlocui oricând cu pozele tale reale.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="dot"></div><h3>Preț</h3></div>
+        <div class="card-b">
+          <div class="row3">
+            <div>
+              <label class="fl">Preț actual</label>
+              <input type="number" id="fPrice" step="0.01" min="0" placeholder="18.99">
+            </div>
+            <div>
+              <label class="fl">Preț vechi</label>
+              <input type="number" id="fOldPrice" step="0.01" min="0" placeholder="24.99">
+            </div>
+            <div>
+              <label class="fl">Monedă</label>
+              <select id="fCurrency">
+                <option value="lei">lei</option>
+                <option value="€">€</option>
+                <option value="$">$</option>
+              </select>
+            </div>
+          </div>
+          <div class="row3">
+            <div>
+              <label class="fl">Per (unitate)</label>
+              <select id="fUnit">
+                <option value="">— fără —</option>
+                <option value="buc">/ buc</option>
+                <option value="kg">/ kg</option>
+                <option value="100g">/ 100g</option>
+                <option value="l">/ l</option>
+                <option value="set">/ set</option>
+                <option value="m">/ m</option>
+                <option value="mp">/ mp</option>
+              </select>
+            </div>
+            <div>
+              <label class="fl">Cantitate ambalaj</label>
+              <input type="number" id="fQty" step="0.001" min="0" placeholder="0.450">
+            </div>
+            <div>
+              <label class="fl">Unit. cantitate</label>
+              <select id="fQtyUnit">
+                <option value="">—</option>
+                <option value="kg">kg</option>
+                <option value="g">g</option>
+                <option value="l">l</option>
+                <option value="ml">ml</option>
+                <option value="buc">buc</option>
+              </select>
+            </div>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;">Dacă pui cantitatea, se calculează automat prețul pe kg / l (obligatoriu la alimente). Reducerea % se calculează singură din prețul vechi.</p>
+        </div>
+      </div>
+
+      <div class="card" id="bannerCard" style="display:none;">
+        <div class="card-h"><div class="dot"></div><h3>Conținut banner</h3></div>
+        <div class="card-b">
+          <label class="fl">Beneficii / puncte forte (unul pe rând, poți începe cu emoji)</label>
+          <textarea id="fFeats" rows="4" placeholder="🍃 Ceai de calitate&#10;🧋 Perle tapioca&#10;😋 Arome delicioase&#10;❤ Bucură-te de fiecare înghițitură!"></textarea>
+          <label class="fl">Text buton jos (îndemn)</label>
+          <input type="text" id="fCta" placeholder="Ex: ALEGE GUSTUL TĂU PREFERAT!">
+          <div class="row3">
+            <div>
+              <label class="fl">Link cod QR</label>
+              <input type="text" id="fQrLink" placeholder="https://…">
+            </div>
+            <div>
+              <label class="fl">Text deasupra QR</label>
+              <input type="text" id="fQrTop" placeholder="SCANEAZĂ-MĂ!" maxlength="20">
+            </div>
+            <div>
+              <label class="fl">Text sub QR</label>
+              <input type="text" id="fQrBottom" placeholder="MENIU & NOUTĂȚI" maxlength="20">
+            </div>
+          </div>
+          <p style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;">Pune link-ul spre meniul tău / pagina de Facebook — codul QR se generează automat. Prețul (dacă îl completezi) apare ca o bulină rotundă peste poze.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="dot"></div><h3>Dimensiune etichetă</h3></div>
+        <div class="card-b">
+          <div class="size-grid" id="sizeGrid"></div>
+          <div class="row2" style="margin-top:10px;">
+            <div>
+              <label class="fl">Lățime (mm)</label>
+              <input type="number" id="fW" min="20" max="1000" value="100">
+            </div>
+            <div>
+              <label class="fl">Înălțime (mm)</label>
+              <input type="number" id="fH" min="20" max="1000" value="70">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="dot"></div><h3>Aspect</h3></div>
+        <div class="card-b">
+          <label class="fl">Temă culoare</label>
+          <div class="theme-grid" id="themeGrid"></div>
+          <div class="row2" style="margin-top:10px;" id="badgeRow">
+            <div>
+              <label class="fl">Insignă (badge)</label>
+              <select id="fBadge">
+                <option value="">— fără —</option>
+                <option>REDUCERE</option>
+                <option>OFERTĂ</option>
+                <option>PROMOȚIE</option>
+                <option>NOU</option>
+                <option>LICHIDARE</option>
+                <option>TOP VÂNZĂRI</option>
+                <option value="custom">✏ Text propriu…</option>
+              </select>
+            </div>
+            <div id="badgeCustomWrap" style="display:none;">
+              <label class="fl">Text insignă</label>
+              <input type="text" id="fBadgeCustom" maxlength="18" placeholder="Ex: -50% AZI">
+            </div>
+          </div>
+          <div style="margin-top:10px;">
+            <label class="chk"><input type="checkbox" id="fShowPhoto" checked> <span id="lblShowPhoto">Arată poza produsului pe etichetă</span></label>
+            <label class="chk"><input type="checkbox" id="fShowDesc" checked> <span id="lblShowDesc">Arată descrierea</span></label>
+            <label class="chk" id="rowBarcode"><input type="checkbox" id="fShowBarcode"> Arată cod de bare</label>
+            <label class="chk"><input type="checkbox" id="fCut" checked> Contur punctat pentru decupare (la print)</label>
+          </div>
+          <div class="row2" id="barcodeWrap" style="display:none;">
+            <div>
+              <label class="fl">Cod produs (cod de bare)</label>
+              <input type="text" id="fBarcodeVal" maxlength="20" placeholder="Ex: 5941234567890">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><div class="dot"></div><h3>Extra</h3></div>
+        <div class="card-b">
+          <div class="row2">
+            <div>
+              <label class="fl">Ofertă valabilă până la</label>
+              <input type="date" id="fValidity">
+            </div>
+            <div>
+              <label class="fl">Copii la printare</label>
+              <input type="number" id="fCopies" min="1" max="200" value="1">
+            </div>
+          </div>
+          <label class="fl">Text subsol (magazin, mențiuni)</label>
+          <input type="text" id="fFooter" placeholder="Ex: Magazin Universal SRL • Ofertă în limita stocului">
+        </div>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="preview-wrap">
+      <div class="card">
+        <div class="card-h"><div class="dot"></div><h3>Previzualizare live</h3></div>
+        <div class="preview-stage" id="previewStage">
+          <div class="scale-box" id="scaleBox"></div>
+        </div>
+        <div class="preview-info" id="previewInfo"></div>
+        <div class="card-b">
+          <div class="btn-row">
+            <button class="btn primary" id="btnSave">💾 Salvează</button>
+            <button class="btn green" id="btnPrint">🖨 Printează</button>
+            <button class="btn" id="btnPng">⬇ Descarcă PNG</button>
+            <button class="btn" id="btnNew">✚ Etichetă nouă</button>
+          </div>
+          <p id="editingInfo" style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-top:8px;display:none;"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ETICHETELE MELE ================= -->
+<section class="page" id="page-labels">
+  <div class="toolbar">
+    <input type="text" id="searchLabels" placeholder="🔍 Caută etichete…">
+    <button class="btn sm" id="btnSelAll">Selectează tot</button>
+    <button class="btn sm green" id="btnPrintSel" disabled>🖨 Printează selectate pe A4</button>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text3);" id="selInfo"></span>
+  </div>
+  <div class="lbl-grid" id="labelsGrid"></div>
+  <div class="empty" id="labelsEmpty" style="display:none;">Nu ai etichete salvate încă.<br>Creează una în Editor și apasă „Salvează".</div>
+</section>
+
+<!-- ================= LOCATII ================= -->
+<section class="page" id="page-locations">
+  <div class="toolbar">
+    <button class="btn primary" id="btnAddLoc">📷 Fotografiază locul de amplasare</button>
+    <input type="file" id="locPhotoInput" accept="image/*" capture="environment" style="display:none;">
+    <span style="font-family:var(--mono);font-size:10px;color:var(--text3);">Fă o poză cu raftul / vitrina / locul unde vei pune eticheta, apoi leag-o de o etichetă salvată.</span>
+  </div>
+  <div class="loc-grid" id="locGrid"></div>
+  <div class="empty" id="locEmpty" style="display:none;">Nicio locație fotografiată încă.<br>Apasă „Fotografiază locul de amplasare".</div>
+</section>
+</main>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modalOv">
+  <div class="modal">
+    <div class="card-h"><div class="dot"></div><h3 id="modalTitle">—</h3></div>
+    <div class="card-b" id="modalBody"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="printArea"></div>
+
+<script>
+'use strict';
+/* =========================================================
+   STARE + STORAGE
+   ========================================================= */
+const LS_LABELS='etichete_v1', LS_LOCS='etichete_locatii_v1';
+const $=id=>document.getElementById(id);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+function loadLS(k){try{return JSON.parse(localStorage.getItem(k))||[];}catch(e){return[];}}
+function saveLS(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}
+  catch(e){toast('⚠ Spațiu de stocare plin — șterge etichete sau locații vechi');return false;}}
+
+let labels=loadLS(LS_LABELS);
+let locations=loadLS(LS_LOCS);
+let editingId=null;          // id-ul etichetei în editare (null = nouă)
+let selectedIds=new Set();   // selecție pentru print pe A4
+
+const SIZES_PRICE=[
+  {id:'s1',name:'Raft mic',w:60,h:40},
+  {id:'s2',name:'Raft mediu',w:80,h:50},
+  {id:'s3',name:'Raft mare',w:100,h:70},
+  {id:'a6',name:'A6 afiș',w:105,h:148},
+  {id:'a5',name:'A5 afiș',w:148,h:210},
+  {id:'a4',name:'A4 poster',w:210,h:297},
+];
+const SIZES_BANNER=[
+  {id:'b1',name:'Banner 50×50',w:500,h:500},
+  {id:'b2',name:'Banner 80×80',w:800,h:800},
+  {id:'b3',name:'Banner 1×1 m',w:1000,h:1000},
+  {id:'b4',name:'Orizontal 2×1 m',w:2000,h:1000},
+  {id:'b5',name:'Roll-up 85×200',w:850,h:2000},
+  {id:'b6',name:'Afiș A1',w:594,h:841},
+];
+const THEMES_PRICE=[
+  {id:'alb',name:'Clasic',sw:'#fff',fg:'#c62828'},
+  {id:'galben',name:'Promo',sw:'#ffe733',fg:'#c62828'},
+  {id:'rosu',name:'Reducere',sw:'#c62828',fg:'#ffe733'},
+  {id:'negru',name:'Elegant',sw:'#141414',fg:'#d4af37'},
+  {id:'verde',name:'Eco',sw:'#f4fbf4',fg:'#2e7d32'},
+  {id:'albastru',name:'Tech',sw:'#eef4fb',fg:'#1565c0'},
+];
+const THEMES_BANNER=[
+  {id:'pastel',name:'Pastel',sw:'linear-gradient(135deg,#fce9f2,#e5d6f8,#f9d3e7)',fg:'#7b3fa0',
+   icons:['#7b3fa0','#e91e63','#43a047','#fb8c00'],star:['#ff6fa5','#d81b60']},
+  {id:'sunset',name:'Apus',sw:'linear-gradient(135deg,#fff3d6,#ffdba5,#ffc98a)',fg:'#e65100',
+   icons:['#e65100','#c62828','#f9a825','#6d4c41'],star:['#ef5350','#b71c1c']},
+  {id:'fresh',name:'Fresh',sw:'linear-gradient(135deg,#eafaf0,#cdeed8,#bfe8cf)',fg:'#2e7d32',
+   icons:['#2e7d32','#00897b','#7cb342','#ef6c00'],star:['#ffa726','#ef6c00']},
+  {id:'ocean',name:'Ocean',sw:'linear-gradient(135deg,#e8f3fd,#cfe4fa,#bcd9f7)',fg:'#1565c0',
+   icons:['#1565c0','#00838f','#5e35b1','#e91e63'],star:['#ff6fa5','#d81b60']},
+  {id:'noapte',name:'Noapte',sw:'linear-gradient(135deg,#191932,#1f1440,#2a1230)',fg:'#e94560',
+   icons:['#e94560','#9c27b0','#00bcd4','#ffb300'],star:['#ffca28','#ff8f00']},
+];
+/* nuanță mai deschisă a unei culori hex (pentru gradiente) */
+function lighten(hex,f){
+  const n=parseInt(hex.slice(1),16),r=n>>16,g=(n>>8)&255,b=n&255;
+  const L=v=>Math.round(v+(255-v)*f);
+  return 'rgb('+L(r)+','+L(g)+','+L(b)+')';
+}
+function sizesFor(kind){return kind==='banner'?SIZES_BANNER:SIZES_PRICE;}
+function themesFor(kind){return kind==='banner'?THEMES_BANNER:THEMES_PRICE;}
+let curKind='price', curSize='s3', curTheme='alb';
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
+function toast(msg){const t=$('toast');t.textContent=msg;t.style.display='block';
+  clearTimeout(t._tm);t._tm=setTimeout(()=>t.style.display='none',2600);}
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function fmtPrice(p){
+  const n=parseFloat(p);if(isNaN(n))return null;
+  const [w,d]=n.toFixed(2).split('.');
+  return {whole:w,dec:d,full:n};
+}
+function todayRO(ts){const d=ts?new Date(ts):new Date();
+  return d.toLocaleDateString('ro-RO',{day:'2-digit',month:'2-digit',year:'numeric'});}
+
+/* ștergem fundalul alb uniform (flood-fill din margini), pentru produse „decupate" */
+function cutoutWhiteBg(canvas){
+  const ctx=canvas.getContext('2d');
+  const w=canvas.width,h=canvas.height;
+  const id=ctx.getImageData(0,0,w,h),d=id.data;
+  const isBg=p=>{const i=p*4,r=d[i],g=d[i+1],b=d[i+2];
+    return r>225&&g>225&&b>225&&Math.max(r,g,b)-Math.min(r,g,b)<26;};
+  // decupăm doar dacă pare poză de studio: minim 3 din 4 colțuri albe
+  const corners=[0,w-1,(h-1)*w,(h-1)*w+w-1].filter(isBg).length;
+  if(corners<3)return null;
+  const vis=new Uint8Array(w*h);const q=[];
+  const push=p=>{if(!vis[p]&&isBg(p)){vis[p]=1;q.push(p);}};
+  for(let x=0;x<w;x++){push(x);push((h-1)*w+x);}
+  for(let y=0;y<h;y++){push(y*w);push(y*w+w-1);}
+  let removed=0;
+  while(q.length){
+    const p=q.pop();removed++;
+    const x=p%w,y=(p-x)/w;
+    if(x>0)push(p-1);if(x<w-1)push(p+1);
+    if(y>0)push(p-w);if(y<h-1)push(p+w);
+  }
+  if(removed<w*h*0.06)return null; // nu pare să aibă fundal alb — renunțăm
+  for(let p=0;p<w*h;p++)if(vis[p])d[p*4+3]=0;
+  // netezim conturul: pixelii lipiți de zona ștearsă devin semi-transparenți
+  for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){
+    const p=y*w+x;
+    if(!vis[p]&&(vis[p-1]||vis[p+1]||vis[p-w]||vis[p+w]))d[p*4+3]=Math.min(d[p*4+3],140);
+  }
+  ctx.putImageData(id,0,0);
+  // tăiem la conținut, cu o margine de 3%
+  let minX=w,minY=h,maxX=0,maxY=0;
+  for(let y=0;y<h;y++)for(let x=0;x<w;x++)
+    if(d[(y*w+x)*4+3]>10){if(x<minX)minX=x;if(x>maxX)maxX=x;if(y<minY)minY=y;if(y>maxY)maxY=y;}
+  if(maxX<=minX||maxY<=minY)return null;
+  const padX=Math.round((maxX-minX)*0.03),padY=Math.round((maxY-minY)*0.03);
+  minX=Math.max(0,minX-padX);maxX=Math.min(w-1,maxX+padX);
+  minY=Math.max(0,minY-padY);maxY=Math.min(h-1,maxY+padY);
+  const out=document.createElement('canvas');
+  out.width=maxX-minX+1;out.height=maxY-minY+1;
+  out.getContext('2d').drawImage(canvas,minX,minY,out.width,out.height,0,0,out.width,out.height);
+  return out;
+}
+
+/* comprimă o imagine la max px; păstrează PNG dacă are transparență (poze decupate) */
+function compressImage(file,maxPx,cb){
+  const r=new FileReader();
+  r.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      let w=img.width,h=img.height;
+      const sc=Math.min(1,maxPx/Math.max(w,h));
+      w=Math.round(w*sc);h=Math.round(h*sc);
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      const ctx=c.getContext('2d');
+      ctx.drawImage(img,0,0,w,h);
+      // detectăm transparența în colțuri și centru-sus
+      let hasAlpha=false;
+      try{
+        for(const [px,py] of [[0,0],[w-1,0],[0,h-1],[w-1,h-1],[w>>1,0]]){
+          if(ctx.getImageData(px,py,1,1).data[3]<250){hasAlpha=true;break;}
+        }
+      }catch(err){}
+      if(hasAlpha){cb(c.toDataURL('image/png'));return;}
+      // poză opacă: dacă are fundal alb de studio, o decupăm să plutească liberă
+      try{
+        const cut=cutoutWhiteBg(c);
+        if(cut){cb(cut.toDataURL('image/png'));return;}
+      }catch(err){}
+      cb(c.toDataURL('image/jpeg',0.82));
+    };
+    img.src=e.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+/* =========================================================
+   COD DE BARE — Code 128 B
+   ========================================================= */
+const C128=["212222","222122","222221","121223","121322","131222","122213","122312","132212","221213","221312","231212","112232","122132","122231","113222","123122","123221","223211","221132","221231","213212","223112","312131","311222","321122","321221","312212","322112","322211","212123","212321","232121","111323","131123","131321","112313","132113","132311","211313","231113","231311","112133","112331","132131","113123","113321","133121","313121","211331","231131","213113","213311","213131","311123","311321","331121","312113","312311","332111","314111","221411","431111","111224","111422","121124","121421","141122","141221","112214","112412","122114","122411","142112","142211","241211","221114","413111","241112","134111","111242","121142","121241","114212","124112","124211","411212","421112","421211","212141","214121","412121","111143","111341","131141","114113","114311","411113","411311","113141","114131","311141","411131","211412","211214","211232"];
+const C128_STOP="2331112";
+function drawBarcode(canvas,text,hPx){
+  text=String(text).replace(/[^\x20-\x7E]/g,'');
+  if(!text){canvas.width=1;canvas.height=1;return;}
+  const codes=[104]; // Start B
+  for(const ch of text)codes.push(ch.charCodeAt(0)-32);
+  let sum=codes[0];
+  for(let i=1;i<codes.length;i++)sum+=codes[i]*i;
+  codes.push(sum%103);
+  let pattern='';
+  for(const c of codes)pattern+=C128[c];
+  pattern+=C128_STOP;
+  const quiet=8;
+  let totalMods=quiet*2;
+  for(const d of pattern)totalMods+=+d;
+  const modW=2;
+  canvas.width=totalMods*modW;canvas.height=hPx;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.fillStyle='#000';
+  let x=quiet*modW,bar=true;
+  for(const d of pattern){
+    const w=+d*modW;
+    if(bar)ctx.fillRect(x,0,w,hPx);
+    x+=w;bar=!bar;
+  }
+}
+
+/* =========================================================
+   COD QR (folosește qrcode-generator de pe CDN)
+   ========================================================= */
+function drawQR(canvas,text){
+  try{
+    if(typeof qrcode==='undefined')throw new Error('offline');
+    const qr=qrcode(0,'M');qr.addData(text);qr.make();
+    const n=qr.getModuleCount(),cell=4,quiet=3;
+    const sz=(n+quiet*2)*cell;
+    canvas.width=canvas.height=sz;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,sz,sz);
+    ctx.fillStyle='#000';
+    for(let r=0;r<n;r++)for(let c=0;c<n;c++)
+      if(qr.isDark(r,c))ctx.fillRect((c+quiet)*cell,(r+quiet)*cell,cell,cell);
+  }catch(e){
+    canvas.width=canvas.height=100;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#eee';ctx.fillRect(0,0,100,100);
+    ctx.fillStyle='#999';ctx.font='16px sans-serif';ctx.textAlign='center';
+    ctx.fillText('QR',50,55);
+  }
+}
+
+/* =========================================================
+   CONSTRUIRE BANNER RECLAMĂ (DOM)
+   ========================================================= */
+const FEAT_GLYPHS=['✓','★','♥','☀'];
+
+/* SVG-uri decorative pentru banner */
+const LEAF_PETAL='M0 0 C7 -7 17 -8 23 -1 C16 4 6 4 0 0 Z';
+const svgLeaf=col=>{
+  // frunze așezate de-o parte și de alta a unei tulpini curbate
+  const leaves=[[19,98,-5],[19,98,-115],[31,79,0],[31,79,-110],
+                [46,60,6],[46,60,-104],[63,40,7],[63,40,-103],[80,22,-48]];
+  return '<svg viewBox="0 0 120 120"><g fill="'+col+'">'+
+    '<path d="M12 112 Q34 66 88 14" stroke="'+col+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+    leaves.map(([x,y,a])=>'<path d="'+LEAF_PETAL+'" transform="translate('+x+' '+y+') rotate('+a+')"/>').join('')+
+    '</g></svg>';
+};
+const svgHeart=col=>'<svg viewBox="0 0 100 100"><path d="M50 88 C22 64 12 42 26 28 C36 18 50 23 50 34 C50 23 64 18 74 28 C88 42 78 64 50 88 Z" fill="none" stroke="'+col+'" stroke-width="9" stroke-linejoin="round"/></svg>';
+const svgSpark=col=>'<svg viewBox="0 0 100 100"><path d="M50 2 L59 41 L98 50 L59 59 L50 98 L41 59 L2 50 L41 41 Z" fill="'+col+'"/></svg>';
+const svgSwash=col=>'<svg viewBox="0 0 120 20"><path d="M6 15 Q60 -6 114 15" stroke="'+col+'" stroke-width="3.5" fill="none" stroke-linecap="round"/><circle cx="6" cy="15" r="2.6" fill="'+col+'"/><circle cx="114" cy="15" r="2.6" fill="'+col+'"/></svg>';
+function svgStar(id,c1,c2){
+  let pts='';
+  for(let i=0;i<32;i++){
+    const a=Math.PI*i/16-Math.PI/2,r=i%2?41:50;
+    pts+=(50+r*Math.cos(a)).toFixed(1)+','+(50+r*Math.sin(a)).toFixed(1)+' ';
+  }
+  return '<svg class="star" viewBox="0 0 100 100"><defs>'+
+    '<linearGradient id="sg'+id+'" x1="0" y1="0" x2="0" y2="1">'+
+    '<stop offset="0" stop-color="'+c1+'"/><stop offset="1" stop-color="'+c2+'"/></linearGradient></defs>'+
+    '<polygon points="'+pts.trim()+'" fill="url(#sg'+id+')"/></svg>';
+}
+/* poziții fixe pentru bulele decorative: [stânga %, sus %, mărime em] */
+const BNR_BUBS=[[6,20,1.6],[91,28,1.0],[12,52,.8],[94,58,1.3],[19,84,.9],
+                [76,9,.7],[56,5,1.0],[88,84,.8],[42,93,.7],[3,36,.6]];
+
+function buildBanner(d,forPrint){
+  const el=document.createElement('div');
+  el.className='bnr bt-'+(d.theme||'pastel')+(d.qrLink?' hasqr':'')+((d.cut&&forPrint!=='png')?' cut':'');
+  const w=+d.w||800,h=+d.h||800;
+  el.style.width=w+'mm';el.style.height=h+'mm';
+  const base=Math.min(w,h)/30;
+  el.style.fontSize=base.toFixed(2)+'mm';
+  const theme=THEMES_BANNER.find(t=>t.id===d.theme)||THEMES_BANNER[0];
+
+  // decorațiuni: frunze în colțuri, inimioare lângă titlu, sclipiri
+  const leafCol=theme.icons[0],heartCol=theme.icons[1],sparkCol=theme.icons[3];
+  [['deco-leaf-tl',svgLeaf(leafCol)],['deco-leaf-bl',svgLeaf(leafCol)],['deco-leaf-br',svgLeaf(leafCol)],
+   ['deco-heart1',svgHeart(heartCol)],['deco-heart2',svgHeart(heartCol)],
+   ['deco-spark1',svgSpark(sparkCol)],['deco-spark2',svgSpark(sparkCol)]]
+   .forEach(([cls,svg])=>{
+     const dv=document.createElement('div');dv.className='bnr-deco '+cls;dv.innerHTML=svg;el.appendChild(dv);
+   });
+  // bule plutitoare
+  BNR_BUBS.forEach(([x,y,sz],i)=>{
+    const b=document.createElement('div');b.className='bnr-bub';
+    const col=theme.icons[i%theme.icons.length];
+    b.style.cssText='left:'+x+'%;top:'+y+'%;width:'+sz+'em;height:'+sz+'em;opacity:.22;'+
+      'background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.9),'+col+' 70%);';
+    el.appendChild(b);
+  });
+
+  if(d.qrLink){
+    const q=document.createElement('div');q.className='bnr-qr';
+    const t1=document.createElement('div');t1.className='qt';t1.textContent=d.qrTop||'SCANEAZĂ-MĂ!';
+    const cv=document.createElement('canvas');drawQR(cv,d.qrLink);
+    const t2=document.createElement('div');t2.className='qt';t2.textContent=d.qrBottom||'';
+    q.appendChild(t1);q.appendChild(cv);if(d.qrBottom)q.appendChild(t2);
+    el.appendChild(q);
+  }
+
+  /* ——— componente, asamblate diferit după forma bannerului ——— */
+  const mkTitle=()=>{
+    if(!d.name)return null;
+    const box=document.createElement('div');
+    const t=document.createElement('div');t.className='bnr-title';t.textContent=d.name;box.appendChild(t);
+    const sw=document.createElement('div');sw.className='bnr-swash';sw.innerHTML=svgSwash(theme.fg);box.appendChild(sw);
+    return box;
+  };
+  const mkTag=()=>{
+    if(!(d.showDesc&&d.desc))return null;
+    const tg=document.createElement('div');tg.className='bnr-tag';
+    const r1=document.createElement('span');r1.className='tr';
+    const tx=document.createElement('span');tx.textContent=d.desc;
+    const r2=document.createElement('span');r2.className='tr';
+    tg.appendChild(r1);tg.appendChild(tx);tg.appendChild(r2);
+    return tg;
+  };
+  const feats=(d.feats||'').split('\n').map(l=>l.trim()).filter(Boolean);
+  const mkFeats=()=>{
+    if(!feats.length)return null;
+    const fc=document.createElement('div');fc.className='bnr-feats';
+    feats.forEach((line,i)=>{
+      const f=document.createElement('div');f.className='bnr-feat';
+      const ic=document.createElement('div');ic.className='fi';
+      const icol=theme.icons[i%theme.icons.length];
+      ic.style.background='linear-gradient(135deg,'+lighten(icol,.35)+','+icol+')';
+      // dacă rândul începe cu emoji, îl folosim ca iconiță
+      const m=line.match(/^(\p{Extended_Pictographic}(?:️)?)\s*/u);
+      let txt=line;
+      if(m){ic.textContent=m[1];txt=line.slice(m[0].length);}
+      else ic.textContent=FEAT_GLYPHS[i%FEAT_GLYPHS.length];
+      const ft=document.createElement('div');ft.className='ft';ft.textContent=txt;
+      f.appendChild(ic);f.appendChild(ft);fc.appendChild(f);
+    });
+    return fc;
+  };
+  const photos=(d.photos||[]).filter(Boolean);
+  const showImgs=d.showPhoto&&photos.length;
+  const mkImgs=()=>{
+    if(!showImgs&&!fmtPrice(d.price))return null;
+    const iw=document.createElement('div');
+    iw.className='bnr-imgs n'+Math.min(3,Math.max(1,photos.length));
+    if(showImgs)photos.slice(0,3).forEach(src=>{
+      const im=document.createElement('img');im.src=src;im.alt='';
+      // pozele cu transparență (PNG decupat) plutesc libere; fotografiile primesc ramă
+      im.className=src.startsWith('data:image/png')?'cutout':'framed';
+      iw.appendChild(im);
+    });
+    const curP=fmtPrice(d.price);
+    if(curP){
+      const pb=document.createElement('div');pb.className='bnr-price';
+      pb.innerHTML=svgStar(d.id||uid(),theme.star[0],theme.star[1]);
+      const oldP=fmtPrice(d.oldPrice);
+      if(oldP&&oldP.full>curP.full){
+        const po=document.createElement('div');po.className='po';
+        po.textContent=oldP.whole+','+oldP.dec;pb.appendChild(po);
+      }
+      const pv=document.createElement('div');pv.className='pv';
+      pv.textContent=curP.whole+','+curP.dec;pb.appendChild(pv);
+      const pu=document.createElement('div');pu.className='pu';
+      pu.textContent=(d.currency||'lei')+(d.unit?' / '+d.unit:'');pb.appendChild(pu);
+      iw.appendChild(pb);
+    }
+    return iw;
+  };
+  const mkCta=()=>{
+    if(!d.cta)return null;
+    const c=document.createElement('div');c.className='bnr-cta';c.textContent=d.cta;return c;
+  };
+  const mkFoot=()=>{
+    const footTxts=[];
+    if(d.validity)footTxts.push('Valabil până la '+todayRO(d.validity+'T12:00:00'));
+    if(d.footer)footTxts.push(d.footer);
+    if(!footTxts.length)return null;
+    const f=document.createElement('div');f.className='bnr-footer';f.textContent=footTxts.join(' • ');return f;
+  };
+  const add=(parent,...nodes)=>nodes.forEach(n=>{if(n)parent.appendChild(n);});
+
+  const ratio=w/h;
+  if(ratio>1.55){
+    /* ——— banner LAT: texte în stânga, poze mari în dreapta ——— */
+    el.classList.add('wide');
+    const row=document.createElement('div');row.className='bnr-wrow';
+    const left=document.createElement('div');left.className='bnr-wleft';
+    add(left,mkTitle(),mkTag(),mkFeats(),mkCta());
+    const imgs=mkImgs();
+    add(row,left);if(imgs)add(row,imgs);
+    add(el,row,mkFoot());
+  }else if(ratio<0.62){
+    /* ——— banner ÎNALT (roll-up): poze mari la mijloc, beneficii sub ele ——— */
+    el.classList.add('tall');
+    add(el,mkTitle(),mkTag(),mkImgs(),mkFeats(),mkCta(),mkFoot());
+  }else{
+    /* ——— format apropiat de pătrat: beneficii stânga, poze dreapta ——— */
+    const fc=mkFeats(),iw=mkImgs();
+    add(el,mkTitle(),mkTag());
+    if(fc||iw){
+      const mid=document.createElement('div');mid.className='bnr-mid';
+      add(mid,fc,iw);el.appendChild(mid);
+    }else{
+      const sp=document.createElement('div');sp.style.flex='1 1 auto';el.appendChild(sp);
+    }
+    add(el,mkCta(),mkFoot());
+  }
+  return el;
+}
+
+/* =========================================================
+   CONSTRUIRE ETICHETĂ (DOM) — folosită peste tot
+   ========================================================= */
+function buildLabel(d,forPrint){
+  if(d.kind==='banner')return buildBanner(d,forPrint);
+  const el=document.createElement('div');
+  el.className='lbl lt-'+(d.theme||'alb')+((d.cut&&forPrint!=='png')?' cut':'');
+  const w=+d.w||100,h=+d.h||70;
+  el.style.width=w+'mm';
+  el.style.height=h+'mm';
+  // tipografia scalează cu lățimea; la afișe înalte limităm după înălțime
+  const base=Math.min(w/19,h/13);
+  el.style.fontSize=base.toFixed(2)+'mm';
+
+  const badgeTxt=d.badge==='custom'?(d.badgeCustom||''):(d.badge||'');
+  if(badgeTxt){const b=document.createElement('div');b.className='lbl-badge';b.textContent=badgeTxt;el.appendChild(b);}
+
+  if(d.name){const n=document.createElement('div');n.className='lbl-name';n.textContent=d.name;
+    if(!badgeTxt)n.style.paddingRight='0';el.appendChild(n);}
+
+  if(d.showDesc&&d.desc){const ds=document.createElement('div');ds.className='lbl-desc';ds.textContent=d.desc;el.appendChild(ds);}
+
+  if(d.showPhoto&&d.photo){
+    const iw=document.createElement('div');iw.className='lbl-img-wrap';
+    const im=document.createElement('img');im.src=d.photo;im.alt='';
+    iw.appendChild(im);el.appendChild(iw);
+  }else{
+    const sp=document.createElement('div');sp.className='lbl-spacer';el.appendChild(sp);
+  }
+
+  const pz=document.createElement('div');pz.className='lbl-price-zone';
+  const oldP=fmtPrice(d.oldPrice),curP=fmtPrice(d.price);
+  if(oldP&&curP&&oldP.full>curP.full){
+    const orow=document.createElement('div');orow.className='lbl-old-row';
+    const o=document.createElement('span');o.className='lbl-old';
+    o.textContent=oldP.whole+','+oldP.dec+' '+(d.currency||'lei');
+    const disc=Math.round((1-curP.full/oldP.full)*100);
+    const dc=document.createElement('span');dc.className='lbl-disc';dc.textContent='-'+disc+'%';
+    orow.appendChild(o);orow.appendChild(dc);pz.appendChild(orow);
+  }
+  if(curP){
+    const prow=document.createElement('div');prow.className='lbl-price-row';
+    const p=document.createElement('span');p.className='lbl-price';
+    p.innerHTML=esc(curP.whole)+'<sup>'+esc(curP.dec)+'</sup>';
+    const c=document.createElement('span');c.className='lbl-curr';c.textContent=d.currency||'lei';
+    prow.appendChild(p);prow.appendChild(c);
+    if(d.unit){const u=document.createElement('span');u.className='lbl-unit';u.textContent='/ '+d.unit;prow.appendChild(u);}
+    pz.appendChild(prow);
+    // preț pe unitate de măsură
+    const qty=parseFloat(d.qty);
+    if(qty>0&&d.qtyUnit){
+      let per=null,perUnit='';
+      if(d.qtyUnit==='g'){per=curP.full/(qty/1000);perUnit='kg';}
+      else if(d.qtyUnit==='kg'){per=curP.full/qty;perUnit='kg';}
+      else if(d.qtyUnit==='ml'){per=curP.full/(qty/1000);perUnit='l';}
+      else if(d.qtyUnit==='l'){per=curP.full/qty;perUnit='l';}
+      else if(d.qtyUnit==='buc'){per=curP.full/qty;perUnit='buc';}
+      if(per!=null&&isFinite(per)){
+        const pu=document.createElement('div');pu.className='lbl-perunit';
+        pu.textContent=per.toFixed(2).replace('.',',')+' '+(d.currency||'lei')+' / '+perUnit;
+        pz.appendChild(pu);
+      }
+    }
+  }
+  el.appendChild(pz);
+
+  const footTxts=[];
+  if(d.validity){footTxts.push('Valabil până la '+todayRO(d.validity+'T12:00:00'));}
+  if(d.footer)footTxts.push(d.footer);
+  const hasBC=d.showBarcode&&d.barcodeVal;
+  if(footTxts.length||hasBC){
+    const f=document.createElement('div');f.className='lbl-foot';
+    const ft=document.createElement('div');ft.className='lbl-foot-txt';
+    ft.innerHTML=footTxts.map(esc).join('<br>');
+    f.appendChild(ft);
+    if(hasBC){
+      const bw=document.createElement('div');bw.className='lbl-barcode';
+      const cv=document.createElement('canvas');
+      drawBarcode(cv,d.barcodeVal,46);
+      cv.style.width='9em';cv.style.height='2em';
+      bw.appendChild(cv);
+      const bt=document.createElement('div');bt.className='bc-txt';bt.textContent=d.barcodeVal;
+      bw.appendChild(bt);f.appendChild(bw);
+    }
+    el.appendChild(f);
+  }
+  return el;
+}
+
+/* citește formularul → obiect etichetă */
+function readForm(){
+  return {
+    id:editingId||uid(),
+    kind:curKind,
+    name:$('fName').value.trim(),
+    desc:$('fDesc').value.trim(),
+    photo:photos[0]||null,
+    photos:photos.filter(Boolean),
+    feats:$('fFeats').value,
+    cta:$('fCta').value.trim(),
+    aiImgPrompt:aiImgPrompt,
+    qrLink:$('fQrLink').value.trim(),
+    qrTop:$('fQrTop').value.trim(),
+    qrBottom:$('fQrBottom').value.trim(),
+    price:$('fPrice').value,
+    oldPrice:$('fOldPrice').value,
+    currency:$('fCurrency').value,
+    unit:$('fUnit').value,
+    qty:$('fQty').value,
+    qtyUnit:$('fQtyUnit').value,
+    w:+$('fW').value||100,
+    h:+$('fH').value||70,
+    sizePreset:curSize,
+    theme:curTheme,
+    badge:$('fBadge').value,
+    badgeCustom:$('fBadgeCustom').value.trim(),
+    showPhoto:$('fShowPhoto').checked,
+    showDesc:$('fShowDesc').checked,
+    showBarcode:$('fShowBarcode').checked,
+    barcodeVal:$('fBarcodeVal').value.trim(),
+    cut:$('fCut').checked,
+    validity:$('fValidity').value,
+    footer:$('fFooter').value.trim(),
+    copies:Math.max(1,+$('fCopies').value||1),
+    updated:Date.now(),
+  };
+}
+
+/* încarcă un obiect etichetă în formular */
+function fillForm(d){
+  setKind(d.kind==='banner'?'banner':'price',false);
+  $('fName').value=d.name||'';
+  $('fDesc').value=d.desc||'';
+  photos=(d.photos||(d.photo?[d.photo]:[])).slice(0,3);
+  renderPhotoSlots();
+  $('fFeats').value=d.feats||'';
+  $('fCta').value=d.cta||'';
+  aiImgPrompt=d.aiImgPrompt||'';
+  $('fQrLink').value=d.qrLink||'';
+  $('fQrTop').value=d.qrTop||'';
+  $('fQrBottom').value=d.qrBottom||'';
+  $('fPrice').value=d.price||'';
+  $('fOldPrice').value=d.oldPrice||'';
+  $('fCurrency').value=d.currency||'lei';
+  $('fUnit').value=d.unit||'';
+  $('fQty').value=d.qty||'';
+  $('fQtyUnit').value=d.qtyUnit||'';
+  $('fW').value=d.w||100;
+  $('fH').value=d.h||70;
+  curSize=d.sizePreset||'custom';
+  curTheme=d.theme||(curKind==='banner'?'pastel':'alb');
+  if(!themesFor(curKind).some(t=>t.id===curTheme))curTheme=themesFor(curKind)[0].id;
+  $('fBadge').value=d.badge||'';
+  $('fBadgeCustom').value=d.badgeCustom||'';
+  $('badgeCustomWrap').style.display=d.badge==='custom'?'':'none';
+  $('fShowPhoto').checked=d.showPhoto!==false;
+  $('fShowDesc').checked=d.showDesc!==false;
+  $('fShowBarcode').checked=!!d.showBarcode;
+  $('barcodeWrap').style.display=(d.showBarcode&&curKind!=='banner')?'':'none';
+  $('fBarcodeVal').value=d.barcodeVal||'';
+  $('fCut').checked=d.cut!==false;
+  $('fValidity').value=d.validity||'';
+  $('fFooter').value=d.footer||'';
+  $('fCopies').value=d.copies||1;
+  renderSizeGrid();renderThemeGrid();renderPreview();
+}
+
+/* =========================================================
+   PREVIEW LIVE
+   ========================================================= */
+const MM=96/25.4; // px per mm
+function renderPreview(){
+  const d=readForm();
+  const box=$('scaleBox');box.innerHTML='';
+  const el=buildLabel(d);
+  box.appendChild(el);
+  const stage=$('previewStage');
+  const availW=stage.clientWidth-48;
+  const availH=Math.max(260,Math.min(560,window.innerHeight-320));
+  const pxW=d.w*MM,pxH=d.h*MM;
+  const sc=Math.min(1,availW/pxW,availH/pxH);
+  box.style.transform='scale('+sc+')';
+  box.style.width=pxW+'px';box.style.height=pxH+'px';
+  stage.style.height=Math.max(260,pxH*sc+48)+'px';
+  $('previewInfo').textContent=d.w+' × '+d.h+' mm — scară '+Math.round(sc*100)+'% — temă: '+(themesFor(curKind).find(t=>t.id===curTheme)||{}).name;
+  $('editingInfo').style.display=editingId?'':'none';
+  if(editingId)$('editingInfo').textContent='✏ Editezi eticheta salvată — „Salvează" actualizează, „Etichetă nouă" pornește alta.';
+}
+
+/* =========================================================
+   FORMULAR — evenimente
+   ========================================================= */
+let photos=[];      // până la 3 poze (banner); eticheta de preț folosește doar prima
+let photoSlotIx=0;  // slotul în care se încarcă următoarea poză
+
+function renderPhotoSlots(){
+  const wrap=$('photoSlots');wrap.innerHTML='';
+  const nSlots=curKind==='banner'?3:1;
+  wrap.classList.toggle('multi',nSlots>1);
+  for(let i=0;i<nSlots;i++){
+    const slot=document.createElement('div');slot.className='photo-drop';
+    if(photos[i]){
+      const img=document.createElement('img');img.src=photos[i];img.alt='';slot.appendChild(img);
+      const x=document.createElement('button');x.className='photo-x';x.textContent='✕';
+      x.onclick=e=>{e.stopPropagation();photos.splice(i,1);renderPhotoSlots();renderPreview();};
+      slot.appendChild(x);
+      const t=document.createElement('div');t.className='ph-txt';t.textContent='Schimbă';slot.appendChild(t);
+    }else{
+      const t=document.createElement('div');t.className='ph-txt';
+      t.textContent=nSlots>1?'📷 Poza '+(i+1):'📷 Apasă pentru poză produs (cameră sau fișier)';
+      slot.appendChild(t);
+    }
+    slot.onclick=()=>{photoSlotIx=i;$('prodPhotoInput').click();};
+    wrap.appendChild(slot);
+  }
+}
+$('prodPhotoInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  compressImage(f,800,url=>{photos[photoSlotIx]=url;renderPhotoSlots();renderPreview();});
+  e.target.value='';
+});
+
+/* comutare tip: etichetă preț / banner reclamă */
+function setKind(k,applyDefaults){
+  curKind=k;
+  const banner=k==='banner';
+  $('kindPrice').classList.toggle('sel',!banner);
+  $('kindBanner').classList.toggle('sel',banner);
+  $('bannerCard').style.display=banner?'':'none';
+  $('badgeRow').style.display=banner?'none':'';
+  $('rowBarcode').style.display=banner?'none':'';
+  $('barcodeWrap').style.display=(!banner&&$('fShowBarcode').checked)?'':'none';
+  $('lblName').textContent=banner?'Titlu banner (numele afacerii / produsului)':'Nume produs';
+  $('lblDesc').textContent=banner?'Slogan (apare sub titlu)':'Descriere (opțional)';
+  $('lblPhotos').textContent=banner?'Poze produse (până la 3)':'Poză produs';
+  $('lblShowPhoto').textContent=banner?'Arată pozele pe banner':'Arată poza produsului pe etichetă';
+  $('lblShowDesc').textContent=banner?'Arată sloganul':'Arată descrierea';
+  if(applyDefaults){
+    const s=banner?SIZES_BANNER[1]:SIZES_PRICE[2];
+    curSize=s.id;$('fW').value=s.w;$('fH').value=s.h;
+    curTheme=banner?'pastel':'alb';
+    $('fShowPhoto').checked=true;
+  }
+  if(!themesFor(k).some(t=>t.id===curTheme))curTheme=themesFor(k)[0].id;
+  renderPhotoSlots();renderSizeGrid();renderThemeGrid();renderPreview();
+}
+$('kindPrice').addEventListener('click',()=>setKind('price',true));
+$('kindBanner').addEventListener('click',()=>setKind('banner',true));
+
+function renderSizeGrid(){
+  const g=$('sizeGrid');g.innerHTML='';
+  sizesFor(curKind).forEach(s=>{
+    const b=document.createElement('div');
+    b.className='size-opt'+(curSize===s.id?' sel':'');
+    b.innerHTML='<span class="sn">'+s.name+'</span><span class="sd">'+s.w+'×'+s.h+' mm</span>';
+    b.onclick=()=>{curSize=s.id;$('fW').value=s.w;$('fH').value=s.h;
+      // la etichete mici ascundem implicit poza (nu încape frumos)
+      if(curKind==='price'&&s.w<=80&&s.h<=50)$('fShowPhoto').checked=false;
+      renderSizeGrid();renderPreview();};
+    g.appendChild(b);
+  });
+}
+function renderThemeGrid(){
+  const g=$('themeGrid');g.innerHTML='';
+  themesFor(curKind).forEach(t=>{
+    const b=document.createElement('div');
+    b.className='theme-opt'+(curTheme===t.id?' sel':'');
+    b.style.background=t.sw;b.title=t.name;
+    b.innerHTML='<span style="background:'+t.fg+';color:'+(t.id==='galben'||t.id==='negru'?'#141414':'#fff')+'">'+t.name+'</span>';
+    b.onclick=()=>{curTheme=t.id;renderThemeGrid();renderPreview();};
+    g.appendChild(b);
+  });
+}
+
+['fName','fDesc','fPrice','fOldPrice','fCurrency','fUnit','fQty','fQtyUnit','fW','fH','fBadgeCustom','fBarcodeVal','fValidity','fFooter','fCopies','fFeats','fCta','fQrLink','fQrTop','fQrBottom']
+ .forEach(id=>$(id).addEventListener('input',()=>{if(id==='fW'||id==='fH')curSize='custom',renderSizeGrid();renderPreview();}));
+['fShowPhoto','fShowDesc','fCut'].forEach(id=>$(id).addEventListener('change',renderPreview));
+$('fShowBarcode').addEventListener('change',()=>{$('barcodeWrap').style.display=$('fShowBarcode').checked?'':'none';renderPreview();});
+$('fBadge').addEventListener('change',()=>{$('badgeCustomWrap').style.display=$('fBadge').value==='custom'?'':'none';renderPreview();});
+window.addEventListener('resize',()=>renderPreview());
+
+/* =========================================================
+   GENERARE DIN DESCRIERE
+   ========================================================= */
+function parseDescription(txt){
+  const out={name:'',desc:'',price:'',oldPrice:''};
+  const lines=txt.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length)return out;
+  // prețuri: numere cu lei/ron/€/$ sau zecimale
+  const prices=[];
+  const reCur=/(\d{1,6}(?:[.,]\d{1,2})?)\s*(?:lei|ron|€|\$)/gi;
+  let m;
+  const whole=txt;
+  while((m=reCur.exec(whole))!==null)prices.push(parseFloat(m[1].replace(',','.')));
+  if(!prices.length){
+    const reDec=/(\d{1,6}[.,]\d{2})(?!\d)/g;
+    while((m=reDec.exec(whole))!==null)prices.push(parseFloat(m[1].replace(',','.')));
+  }
+  if(prices.length===1)out.price=prices[0];
+  else if(prices.length>=2){
+    const mx=Math.max(...prices),mn=Math.min(...prices);
+    out.price=mn;if(mx>mn)out.oldPrice=mx;
+  }
+  // numele = primul rând, fără partea de preț
+  out.name=lines[0].replace(reCur,'').replace(/[-–—:•]+\s*$/,'').trim();
+  if(!out.name)out.name=lines[0];
+  // descrierea = restul rândurilor care nu sunt doar preț
+  const descLines=lines.slice(1).filter(l=>{
+    const noP=l.replace(reCur,'').replace(/(\d{1,6}[.,]\d{2})/g,'').replace(/preț|pret|vechi|acum|doar|redus|oferta|ofertă|!|\.|,|-|–|—/gi,'').trim();
+    return noP.length>2;
+  });
+  out.desc=descLines.join(' • ');
+  out.descLines=descLines;
+  return out;
+}
+$('btnQuick').addEventListener('click',()=>{
+  const t=$('quickText').value.trim();
+  if(!t){toast('Lipește mai întâi o descriere');return;}
+  const p=parseDescription(t);
+  if(p.name)$('fName').value=p.name;
+  if(curKind==='banner'){
+    // pe banner, rândurile devin beneficii; primul rând scurt = slogan
+    if(p.descLines.length){
+      if(p.descLines[0].length<=40&&p.descLines.length>1){
+        $('fDesc').value=p.descLines[0];
+        $('fFeats').value=p.descLines.slice(1).join('\n');
+      }else $('fFeats').value=p.descLines.join('\n');
+    }
+  }else if(p.desc)$('fDesc').value=p.desc;
+  if(p.price!=='')$('fPrice').value=p.price;
+  if(p.oldPrice!=='')$('fOldPrice').value=p.oldPrice;
+  renderPreview();
+  toast('✓ '+(curKind==='banner'?'Banner generat':'Etichetă generată')+' — verifică și ajustează câmpurile');
+});
+$('btnQuickClear').addEventListener('click',()=>{$('quickText').value='';});
+
+/* =========================================================
+   MOTOR AI GRATUIT — Pollinations.ai (fără cont / cheie)
+   ========================================================= */
+function btnBusy(btn,busy,busyTxt){
+  if(busy){btn.dataset.txt=btn.textContent;btn.textContent=busyTxt;btn.disabled=true;}
+  else{btn.textContent=btn.dataset.txt||btn.textContent;btn.disabled=false;}
+}
+
+/* generare texte: titlu, slogan, beneficii, îndemn */
+$('btnAiText').addEventListener('click',async()=>{
+  const descr=$('quickText').value.trim();
+  if(!descr){toast('Scrie mai întâi o descriere a afacerii / produsului');return;}
+  const btn=$('btnAiText');btnBusy(btn,true,'✨ AI lucrează…');
+  const isBanner=curKind==='banner';
+  const prompt='Ești un designer de reclame român premiat. Pe baza acestei descrieri: "'+descr+'" '+
+    'creează conținut pentru '+(isBanner?'un banner publicitar stradal':'o etichetă de preț')+'. '+
+    'Răspunde DOAR cu un obiect JSON valid, fără alt text, cu exact aceste chei: '+
+    '{"title":"numele scurt și atrăgător al brandului sau produsului (max 3 cuvinte)",'+
+    '"slogan":"slogan de 3-4 cuvinte scurte despărțite prin punct, cu MAJUSCULE, ex: RĂCORIRE. BUBBLE. BUCURIE.",'+
+    '"benefits":["exact 4 beneficii foarte scurte (2-4 cuvinte), fiecare începând cu un emoji potrivit"],'+
+    '"cta":"un îndemn scurt și energic pentru client, max 5 cuvinte",'+
+    '"price":"prețul numeric dacă apare în descriere, altfel null",'+
+    '"theme":"alege tema de culori cea mai potrivită produsului, exact una dintre: pastel (dulciuri, cofetărie, produse pentru copii), sunset (patiserie, cafea, fast-food, produse calde), fresh (legume, fructe, produse naturale, eco), ocean (pește, băuturi reci, servicii, tehnologie), noapte (baruri, evenimente, electronice, premium)",'+
+    '"image_prompt":"descriere fotografică în limba ENGLEZĂ a produsului, foarte concretă și vizuală, pentru un generator de imagini: obiectul exact, culori, textură, context — ex: glass cup of purple taro bubble tea with tapioca pearls and pastel straw"}';
+  try{
+    const r=await fetch('https://text.pollinations.ai/'+encodeURIComponent(prompt));
+    if(!r.ok)throw new Error('serviciul AI a răspuns cu eroare '+r.status);
+    const t=await r.text();
+    const m=t.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('răspuns AI neașteptat');
+    const j=JSON.parse(m[0]);
+    if(j.title)$('fName').value=String(j.title);
+    if(j.slogan)$('fDesc').value=String(j.slogan);
+    if(isBanner){
+      if(Array.isArray(j.benefits)&&j.benefits.length)$('fFeats').value=j.benefits.map(String).join('\n');
+      if(j.cta)$('fCta').value=String(j.cta);
+      if(j.theme&&THEMES_BANNER.some(t=>t.id===j.theme)){curTheme=j.theme;renderThemeGrid();}
+    }
+    if(j.price!=null&&j.price!==''&&!isNaN(parseFloat(j.price)))$('fPrice').value=parseFloat(j.price);
+    if(j.image_prompt)aiImgPrompt=String(j.image_prompt);
+    renderPreview();
+    toast('✨ Conținut generat de AI — acum apasă „Generează poze cu AI"');
+  }catch(e){
+    toast('⚠ AI indisponibil ('+e.message+') — încearcă din nou sau folosește ⚡ Rapid');
+  }
+  btnBusy(btn,false);
+});
+
+/* poză AI: decupăm fundalul alb ca produsul să plutească liber pe banner */
+function processAiImage(blob,maxPx,cb){
+  const url=URL.createObjectURL(blob);
+  const img=new Image();
+  img.onload=()=>{
+    URL.revokeObjectURL(url);
+    let c=document.createElement('canvas');
+    c.width=img.width;c.height=img.height;
+    c.getContext('2d').drawImage(img,0,0);
+    const cut=cutoutWhiteBg(c);
+    if(cut)c=cut;
+    const sc=Math.min(1,maxPx/Math.max(c.width,c.height));
+    if(sc<1){
+      const s=document.createElement('canvas');
+      s.width=Math.round(c.width*sc);s.height=Math.round(c.height*sc);
+      s.getContext('2d').drawImage(c,0,0,s.width,s.height);
+      c=s;
+    }
+    cb(cut?c.toDataURL('image/png'):c.toDataURL('image/jpeg',0.82));
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);cb(null);};
+  img.src=url;
+}
+
+/* generare poze de produs cu AI */
+let aiImgPrompt='';   // promptul fotografic scris de AI la generarea textelor
+$('btnAiImgs').addEventListener('click',async()=>{
+  const name=$('fName').value.trim();
+  if(!name&&!aiImgPrompt){toast('Completează mai întâi numele produsului / titlul');return;}
+  const n=curKind==='banner'?3:1;
+  if(photos.filter(Boolean).length&&!confirm('Pozele existente vor fi înlocuite cu poze generate de AI. Continui?'))return;
+  const btn=$('btnAiImgs');
+  // folosim promptul fotografic al AI-ului dacă există; altfel numele + descrierea
+  const subj=aiImgPrompt||(name+($('fDesc').value.trim()?', '+$('fDesc').value.trim():''));
+  const ANGLES=['hero shot, centered composition','three-quarter angle view','close-up detail shot'];
+  try{
+    for(let i=0;i<n;i++){
+      btnBusy(btn,true,'✨ Generez poza '+(i+1)+'/'+n+'…');
+      const prompt='hyperrealistic professional product photography, '+subj+
+        ', '+ANGLES[i%ANGLES.length]+
+        ', shot on 85mm lens f/2.8, studio softbox lighting, natural reflections and highlights'+
+        ', appetizing rich colors, ultra detailed textures, tack sharp focus, high dynamic range'+
+        ', single product isolated on pure solid white background, commercial advertising hero shot'+
+        ', no text, no watermark, no logo, no hands, no people';
+      const url='https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+
+        '?width=768&height=1024&nologo=true&enhance=true&model=flux&seed='+Math.floor(Math.random()*1e6);
+      const r=await fetch(url);
+      if(!r.ok)throw new Error('serviciul AI a răspuns cu eroare '+r.status);
+      const blob=await r.blob();
+      await new Promise((res,rej)=>{
+        processAiImage(blob,800,durl=>{if(durl){photos[i]=durl;res();}else rej(new Error('poza nu a putut fi procesată'));});
+        setTimeout(()=>rej(new Error('timeout la procesarea pozei')),30000);
+      });
+      renderPhotoSlots();renderPreview();
+    }
+    toast('✨ '+n+(n>1?' poze generate':' poză generată')+' — le poți schimba oricând');
+  }catch(e){
+    toast('⚠ Generarea AI a eșuat ('+e.message+') — verifică internetul și reîncearcă');
+  }
+  btnBusy(btn,false);
+});
+
+/* =========================================================
+   SALVARE / LISTĂ ETICHETE
+   ========================================================= */
+function saveLabel(){
+  const d=readForm();
+  if(!d.name&&!d.price){toast('Completează măcar numele sau prețul');return;}
+  const ix=labels.findIndex(l=>l.id===d.id);
+  if(ix>=0){d.created=labels[ix].created;labels[ix]=d;}
+  else{d.created=Date.now();labels.unshift(d);}
+  if(saveLS(LS_LABELS,labels)){
+    editingId=d.id;
+    toast('✓ Etichetă salvată');
+    updateCounts();renderLabels();renderPreview();
+  }
+}
+$('btnSave').addEventListener('click',saveLabel);
+$('btnNew').addEventListener('click',()=>{
+  editingId=null;
+  if(curKind==='banner')
+    fillForm({kind:'banner',w:800,h:800,sizePreset:'b2',theme:'pastel',showPhoto:true,showDesc:true,cut:true,copies:1});
+  else
+    fillForm({kind:'price',w:100,h:70,sizePreset:'s3',theme:'alb',showPhoto:true,showDesc:true,cut:true,copies:1});
+  toast('Editor golit — de la zero');
+});
+
+function updateCounts(){
+  $('cntLabels').textContent=labels.length;
+  $('cntLocs').textContent=locations.length;
+}
+
+function renderLabels(){
+  const q=$('searchLabels').value.trim().toLowerCase();
+  const g=$('labelsGrid');g.innerHTML='';
+  const list=labels.filter(l=>!q||(l.name||'').toLowerCase().includes(q)||(l.desc||'').toLowerCase().includes(q));
+  $('labelsEmpty').style.display=list.length?'none':'';
+  list.forEach(d=>{
+    const card=document.createElement('div');
+    card.className='lbl-card'+(selectedIds.has(d.id)?' sel-card':'');
+    // mini preview
+    const pv=document.createElement('div');pv.className='lbl-card-prev';
+    const inner=document.createElement('div');inner.style.transformOrigin='center';
+    const el=buildLabel(d);
+    inner.appendChild(el);pv.appendChild(inner);
+    pv.title='Click pentru selectare (print pe A4)';
+    pv.onclick=()=>{
+      if(selectedIds.has(d.id))selectedIds.delete(d.id);else selectedIds.add(d.id);
+      renderLabels();updateSelUI();
+    };
+    card.appendChild(pv);
+    // scalare mini după montare
+    requestAnimationFrame(()=>{
+      const pxW=d.w*MM,pxH=d.h*MM;
+      const availW=pv.clientWidth-24,availH=160;
+      const sc=Math.min(1,availW/pxW,availH/pxH);
+      inner.style.transform='scale('+sc+')';
+      inner.style.width=pxW+'px';inner.style.height=pxH+'px';
+      pv.style.height=Math.max(140,pxH*sc+24)+'px';
+    });
+    const b=document.createElement('div');b.className='lbl-card-b';
+    const pr=fmtPrice(d.price);
+    b.innerHTML='<div class="nm">'+esc(d.name||'(fără nume)')+'</div>'+
+      '<div class="mt">'+(pr?pr.whole+','+pr.dec+' '+esc(d.currency||'lei')+' • ':'')+d.w+'×'+d.h+'mm • '+todayRO(d.updated)+'</div>';
+    card.appendChild(b);
+    const acts=document.createElement('div');acts.className='lbl-card-acts';
+    const mkBtn=(txt,cls,fn)=>{const bt=document.createElement('button');bt.className='icon-btn'+(cls?' '+cls:'');bt.textContent=txt;bt.onclick=fn;return bt;};
+    acts.appendChild(mkBtn('✏ Editează','',()=>{editingId=d.id;fillForm(d);showPage('editor');}));
+    acts.appendChild(mkBtn('⧉ Duplică','',()=>{
+      const c=JSON.parse(JSON.stringify(d));c.id=uid();c.name=(c.name||'')+' (copie)';c.created=c.updated=Date.now();
+      labels.unshift(c);saveLS(LS_LABELS,labels);updateCounts();renderLabels();toast('✓ Duplicat');
+    }));
+    acts.appendChild(mkBtn('🖨','',()=>printLabels([d])));
+    acts.appendChild(mkBtn('🗑','danger',()=>{
+      if(!confirm('Ștergi eticheta „'+(d.name||'fără nume')+'"?'))return;
+      labels=labels.filter(l=>l.id!==d.id);selectedIds.delete(d.id);
+      if(editingId===d.id)editingId=null;
+      saveLS(LS_LABELS,labels);updateCounts();renderLabels();updateSelUI();toast('Etichetă ștearsă');
+    }));
+    card.appendChild(acts);
+    g.appendChild(card);
+  });
+}
+$('searchLabels').addEventListener('input',renderLabels);
+function updateSelUI(){
+  $('btnPrintSel').disabled=selectedIds.size===0;
+  $('selInfo').textContent=selectedIds.size?selectedIds.size+' selectate':'';
+}
+$('btnSelAll').addEventListener('click',()=>{
+  if(selectedIds.size===labels.length)selectedIds.clear();
+  else labels.forEach(l=>selectedIds.add(l.id));
+  renderLabels();updateSelUI();
+});
+$('btnPrintSel').addEventListener('click',()=>{
+  const sel=labels.filter(l=>selectedIds.has(l.id));
+  if(sel.length)printLabels(sel);
+});
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+function printLabels(list){
+  const pa=$('printArea');pa.innerHTML='';
+  const sheet=document.createElement('div');sheet.className='print-sheet';
+  const MAXW=194,MAXH=281; // zona utilă A4 cu margini de 8mm
+  list.forEach(d=>{
+    const copies=Math.max(1,+d.copies||1);
+    for(let i=0;i<copies;i++){
+      const el=buildLabel(d,'print');
+      if(d.w>MAXW||d.h>MAXH){
+        // bannerele mari se printează scalate ca previzualizare pe A4
+        const sc=Math.min(MAXW/d.w,MAXH/d.h);
+        const wrap=document.createElement('div');
+        wrap.style.cssText='width:'+(d.w*sc)+'mm;height:'+(d.h*sc)+'mm;overflow:hidden;break-inside:avoid;page-break-inside:avoid;';
+        el.style.transform='scale('+sc+')';
+        el.style.transformOrigin='top left';
+        wrap.appendChild(el);
+        sheet.appendChild(wrap);
+      }else sheet.appendChild(el);
+    }
+  });
+  pa.appendChild(sheet);
+  window.print();
+}
+$('btnPrint').addEventListener('click',()=>printLabels([readForm()]));
+
+/* =========================================================
+   EXPORT PNG
+   ========================================================= */
+$('btnPng').addEventListener('click',async()=>{
+  if(typeof html2canvas==='undefined'){toast('⚠ Export PNG indisponibil offline — folosește Printează');return;}
+  const d=readForm();
+  const holder=document.createElement('div');
+  holder.style.cssText='position:fixed;left:-10000px;top:0;';
+  const el=buildLabel(d,'png');
+  holder.appendChild(el);document.body.appendChild(holder);
+  try{
+    const pxW=d.w*MM;
+    // țintim ~3000px lățime: net pentru tipografie, fără să blocăm browserul
+    const scale=Math.max(0.5,Math.min(6,3000/pxW));
+    const cv=await html2canvas(el,{scale,backgroundColor:null,logging:false});
+    const a=document.createElement('a');
+    a.download='eticheta-'+(d.name||'produs').toLowerCase().replace(/[^a-z0-9ăâîșț]+/gi,'-').replace(/^-+|-+$/g,'').slice(0,40)+'.png';
+    a.href=cv.toDataURL('image/png');
+    a.click();
+    toast('✓ PNG descărcat');
+  }catch(e){toast('⚠ Eroare la export: '+e.message);}
+  holder.remove();
+});
+
+/* =========================================================
+   LOCATII AMPLASARE
+   ========================================================= */
+$('btnAddLoc').addEventListener('click',()=>$('locPhotoInput').click());
+$('locPhotoInput').addEventListener('change',e=>{
+  const f=e.target.files[0];if(!f)return;
+  compressImage(f,1000,url=>{
+    openLocModal({id:uid(),photo:url,note:'',labelId:'',created:Date.now()},true);
+  });
+  e.target.value='';
+});
+
+function openLocModal(loc,isNew){
+  const opts=labels.map(l=>'<option value="'+l.id+'"'+(loc.labelId===l.id?' selected':'')+'>'+esc(l.name||'(fără nume)')+'</option>').join('');
+  openModal(isNew?'Locație nouă':'Editare locație',
+    '<img class="big" src="'+loc.photo+'" alt="">'+
+    '<label class="fl">Notă (unde e locul acesta?)</label>'+
+    '<input type="text" id="mLocNote" value="'+esc(loc.note)+'" placeholder="Ex: Raft lactate, intrare dreapta">'+
+    '<label class="fl">Leagă de eticheta</label>'+
+    '<select id="mLocLabel"><option value="">— nicio etichetă —</option>'+opts+'</select>'+
+    '<div class="btn-row" style="margin-top:14px;">'+
+      '<button class="btn primary" id="mLocSave">💾 Salvează locația</button>'+
+      '<button class="btn" id="mLocCancel">Renunță</button></div>');
+  $('mLocSave').onclick=()=>{
+    loc.note=$('mLocNote').value.trim();
+    loc.labelId=$('mLocLabel').value;
+    const ix=locations.findIndex(x=>x.id===loc.id);
+    if(ix>=0)locations[ix]=loc;else locations.unshift(loc);
+    if(saveLS(LS_LOCS,locations)){closeModal();updateCounts();renderLocations();toast('✓ Locație salvată');}
+  };
+  $('mLocCancel').onclick=closeModal;
+}
+
+function renderLocations(){
+  const g=$('locGrid');g.innerHTML='';
+  $('locEmpty').style.display=locations.length?'none':'';
+  locations.forEach(loc=>{
+    const lbl=labels.find(l=>l.id===loc.labelId);
+    const card=document.createElement('div');card.className='loc-card';
+    const im=document.createElement('img');im.src=loc.photo;im.alt='';
+    im.onclick=()=>openModal('Locație amplasare','<img class="big" src="'+loc.photo+'">'+
+      (loc.note?'<p style="margin-top:10px;font-size:14px;">'+esc(loc.note)+'</p>':'')+
+      (lbl?'<p style="font-family:var(--mono);font-size:11px;color:var(--orange);margin-top:6px;">🏷 '+esc(lbl.name||'')+'</p>':'')+
+      '<div class="btn-row" style="margin-top:14px;"><button class="btn" onclick="closeModal()">Închide</button></div>');
+    card.appendChild(im);
+    const b=document.createElement('div');b.className='loc-card-b';
+    b.innerHTML='<div class="nt">'+esc(loc.note||'(fără notă)')+'</div>'+
+      (lbl?'<div class="lk">🏷 '+esc(lbl.name||'(fără nume)')+'</div>':'<div class="lk" style="color:var(--text3);">— nelegat de etichetă —</div>')+
+      '<div class="dt">'+todayRO(loc.created)+'</div>';
+    card.appendChild(b);
+    const acts=document.createElement('div');acts.className='loc-card-acts';
+    const be=document.createElement('button');be.className='icon-btn';be.textContent='✏ Editează';
+    be.onclick=()=>openLocModal(JSON.parse(JSON.stringify(loc)),false);
+    const bd=document.createElement('button');bd.className='icon-btn danger';bd.textContent='🗑';
+    bd.onclick=()=>{if(!confirm('Ștergi această locație?'))return;
+      locations=locations.filter(x=>x.id!==loc.id);saveLS(LS_LOCS,locations);updateCounts();renderLocations();};
+    acts.appendChild(be);acts.appendChild(bd);
+    card.appendChild(acts);
+    g.appendChild(card);
+  });
+}
+
+/* =========================================================
+   MODAL + TABS
+   ========================================================= */
+function openModal(title,html){$('modalTitle').textContent=title;$('modalBody').innerHTML=html;$('modalOv').classList.add('open');}
+function closeModal(){$('modalOv').classList.remove('open');}
+window.closeModal=closeModal;
+$('modalOv').addEventListener('click',e=>{if(e.target.id==='modalOv')closeModal();});
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+id));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.page===id));
+  if(id==='editor')renderPreview();
+  if(id==='labels')renderLabels();
+  if(id==='locations')renderLocations();
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>showPage(t.dataset.page)));
+
+/* =========================================================
+   INIT
+   ========================================================= */
+renderSizeGrid();
+renderThemeGrid();
+renderPhotoSlots();
+updateCounts();
+renderPreview();
+renderLabels();
+renderLocations();
+updateSelUI();
+</script>
+</body>
+</html>
